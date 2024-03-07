@@ -29,15 +29,6 @@ const SearchBar = ({ placeHolder, value, setValue }: SearchBarProps) => {
           height: "2.8rem",
           alignItems: "center",
         },
-        endAdornment: (
-          <InputAdornment position="end">
-            <Tooltip title={""} placement="top" arrow>
-              <IconButton>
-                <Search />
-              </IconButton>
-            </Tooltip>
-          </InputAdornment>
-        ),
       }}
       label={placeHolder}
       variant="outlined"
