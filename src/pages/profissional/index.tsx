@@ -95,7 +95,7 @@ const PageProfissional = ({}: PageProfissionalProps) => {
           sx={{ backgroundColor: "#fff" }}
           width={"50rem"}
           borderRadius={"2rem"}
-          gap={2}
+          gap={1}
         >
           <Grid item xs={12}>
             <SearchBar
@@ -111,6 +111,7 @@ const PageProfissional = ({}: PageProfissionalProps) => {
               backgroundColor: "#edf2fb",
               padding: "1rem",
               borderRadius: "1rem",
+              minHeight: "28rem",
               boxShadow: "0px 1px 1px 0px rgba(0,0,0,0.20)",
             }}
             xs={12}
