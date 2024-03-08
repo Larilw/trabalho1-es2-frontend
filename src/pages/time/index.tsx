@@ -72,7 +72,7 @@ const PageProjeto = () => {
 
   return (
     <>
-      <Grid container>
+      <Grid container gap={3}>
         <Grid
           container
           padding={"1rem"}
@@ -237,11 +237,21 @@ const PageProjeto = () => {
         </Grid>
         <Grid item>
           <Image
-            src={"/kanban_ilustration.jpg"}
-            alt="kanban-ilustration"
+            src={"/team.svg"}
+            alt="team-ilustration"
             width={500}
             height={500}
           ></Image>
+          <Typography sx={{ fontSize: "0.6rem" }}>
+            <a
+              href="https://storyset.com/people"
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ color: "grey", textDecoration: "none" }}
+            >
+              People illustrations by Storyset
+            </a>
+          </Typography>
         </Grid>
       </Grid>
     </>

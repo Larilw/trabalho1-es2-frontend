@@ -18,20 +18,15 @@ import { useState } from "react";
 import Image from "next/image";
 import ConfirmationDialog from "@/components/ConfirmationDialog";
 import FormDialog from "@/components/FormDialog";
-import InputLabel from "@mui/material/InputLabel";
-import MenuItem from "@mui/material/MenuItem";
-import FormControl from "@mui/material/FormControl";
-import Select, { SelectChangeEvent } from "@mui/material/Select";
 import { DemoContainer } from "@mui/x-date-pickers/internals/demo";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import dayjs from "dayjs";
 import customParseFormat from "dayjs/plugin/customParseFormat";
+import React from "react";
 
-interface PageProfissionalProps {}
-
-const PageProfissional = ({}: PageProfissionalProps) => {
+const PageProjeto = () => {
   const [searchValue, setSearchValue] = useState("");
   const [openConfirmationDialog, setOpenConfirmationDialog] = useState(false);
   const [confirmationDeleteId, setConfirmationDeleteId] = useState<
@@ -46,27 +41,33 @@ const PageProfissional = ({}: PageProfissionalProps) => {
   const [date, setDate] = useState<Date | null>(null);
   const [expertise, setExpertise] = useState("");
   const [name, setName] = useState("");
+  const [price, setPrice] = useState<string | null>(null);
 
   dayjs.extend(customParseFormat);
   const formatoData = "DD/MM/YYYY";
   const dayjsComFormato = dayjs().format(formatoData);
   const adapter = new AdapterDayjs({ locale: dayjsComFormato });
 
-  const handleGenderChange = (event: SelectChangeEvent) => {
-    setGender(event.target.value as string);
-  };
-
-  const handleRaceChange = (event: SelectChangeEvent) => {
-    setRace(event.target.value as string);
-  };
-
-  const handleExpertiseChange = (event: SelectChangeEvent) => {
-    setExpertise(event.target.value as string);
-  };
-
   const handleNameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setName(event.target.value);
   };
+
+  /*Lista do modal*/
+  const [checked, setChecked] = React.useState([1]);
+
+  const handleToggle = (value: number) => () => {
+    const currentIndex = checked.indexOf(value);
+    const newChecked = [...checked];
+
+    if (currentIndex === -1) {
+      newChecked.push(value);
+    } else {
+      newChecked.splice(currentIndex, 1);
+    }
+
+    setChecked(newChecked);
+  };
+  /* Lista do modal*/
 
   const items = [
     { name: "lari", id: 1 },
@@ -86,6 +87,7 @@ const PageProfissional = ({}: PageProfissionalProps) => {
     { name: "x", id: 15 },
     { name: "x", id: 16 },
   ];
+
   return (
     <>
       <Grid container gap={3}>
@@ -95,11 +97,11 @@ const PageProfissional = ({}: PageProfissionalProps) => {
           sx={{ backgroundColor: "#fff" }}
           width={"50rem"}
           borderRadius={"2rem"}
-          gap={1}
+          gap={2}
         >
           <Grid item xs={12}>
             <SearchBar
-              placeHolder="Buscar profissional"
+              placeHolder="Buscar projeto"
               value={searchValue}
               setValue={setSearchValue}
             ></SearchBar>
@@ -111,14 +113,13 @@ const PageProfissional = ({}: PageProfissionalProps) => {
               backgroundColor: "#edf2fb",
               padding: "1rem",
               borderRadius: "1rem",
-              minHeight: "28rem",
               boxShadow: "0px 1px 1px 0px rgba(0,0,0,0.20)",
             }}
             xs={12}
             gap={1}
             flexDirection={"column"}
           >
-            <Typography sx={{ marginLeft: "0.1rem" }}>Profissionais</Typography>
+            <Typography sx={{ marginLeft: "0.1rem" }}>Projetos</Typography>
             <Box
               padding={1}
               sx={{ backgroundColor: "background.paper", borderRadius: "1rem" }}
@@ -136,7 +137,7 @@ const PageProfissional = ({}: PageProfissionalProps) => {
                 searchValue={searchValue}
               ></CustomList>
               <ConfirmationDialog
-                dialogText="Confirme a exclusão do funcionário"
+                dialogText="Confirme a exclusão do projeto"
                 open={openConfirmationDialog}
                 setOpen={setOpenConfirmationDialog}
                 setConfirmation={(confirmed) => {
@@ -148,7 +149,7 @@ const PageProfissional = ({}: PageProfissionalProps) => {
                 }}
               />
               <FormDialog
-                formTitle="Dados do Profissional"
+                formTitle="Dados do Projeto"
                 open={openFormDialog}
                 setOpen={setOpenFormDialog}
                 setConfirmation={(confirmed) => {
@@ -170,67 +171,76 @@ const PageProfissional = ({}: PageProfissionalProps) => {
                   justifyContent={"center"}
                   gap={1}
                 >
-                  <Typography variant="h5">Dados do Profissional</Typography>
+                  <Typography variant="h5">Dados do Projeto</Typography>
                   <TextField
                     fullWidth
                     id="outlined-basic"
-                    label="Nome completo"
+                    label="Nome do Projeto"
+                    variant="outlined"
+                    onChange={handleNameChange}
+                  />
+                  <TextField
+                    fullWidth
+                    id="outlined-basic"
+                    label="Nome do Cliente"
+                    variant="outlined"
+                    onChange={handleNameChange}
+                  />
+                  <TextField
+                    fullWidth
+                    id="outlined-basic"
+                    label="Objetivo do Projeto"
                     variant="outlined"
                     onChange={handleNameChange}
                   />
                   <LocalizationProvider dateAdapter={AdapterDayjs}>
                     <DemoContainer components={["DatePicker"]}>
                       <DatePicker
-                        label="Data de Nascimento"
+                        label="Data de Início"
                         format="DD/MM/YYYY"
                         onChange={(newDate: Date | null) => setDate(newDate)}
                       />
                     </DemoContainer>
                   </LocalizationProvider>
-                  <FormControl fullWidth>
-                    <InputLabel id="gender-select-label">Gênero</InputLabel>
-                    <Select
-                      labelId="gender-select-label"
-                      id="gender-select"
-                      value={gender}
-                      label="Gender"
-                      onChange={handleGenderChange}
-                    >
-                      <MenuItem value={"fem"}>Feminino</MenuItem>
-                      <MenuItem value={"mas"}>Masculino</MenuItem>
-                      <MenuItem value={"nonbi"}>Não binário</MenuItem>
-                    </Select>
-                  </FormControl>
-                  <FormControl fullWidth>
-                    <InputLabel id="racial-select-label">Raça</InputLabel>
-                    <Select
-                      labelId="racial-select-label"
-                      id="racial-select"
-                      value={race}
-                      label="Race"
-                      onChange={handleRaceChange}
-                    >
-                      <MenuItem value={"white"}>Branco</MenuItem>
-                      <MenuItem value={"yellow"}>Amarelo</MenuItem>
-                    </Select>
-                  </FormControl>
-                  <FormControl fullWidth>
-                    <InputLabel id="expertise-select-label">
-                      Especialidade
-                    </InputLabel>
-                    <Select
-                      labelId="expertise-select-label"
-                      id="expertise-select"
-                      value={expertise}
-                      label="Expertise"
-                      onChange={handleExpertiseChange}
-                    >
-                      <MenuItem value={"fullstack"}>
-                        Desenvolvedor fullstack
-                      </MenuItem>
-                      <MenuItem value={"back"}>Desenvolvedor backend</MenuItem>
-                    </Select>
-                  </FormControl>
+                  <LocalizationProvider dateAdapter={AdapterDayjs}>
+                    <DemoContainer components={["DatePicker"]}>
+                      <DatePicker
+                        label="Data de Término"
+                        format="DD/MM/YYYY"
+                        onChange={(newDate: Date | null) => setDate(newDate)}
+                      />
+                    </DemoContainer>
+                  </LocalizationProvider>
+                  {/*
+                  <TextField
+                    label="react-number-format"
+                    value={values.toFixed(2)}
+                    onChange={handleChange}
+                    name="numberformat"
+                    id="formatted-numberformat-input"
+                    InputProps={{
+                      inputComponent: NumberFormatCustom,
+                    }}
+                  />
+                   */}
+                  {/* <FormControl fullWidth>
+      <InputLabel id="team-select-label">
+        Time responsável
+      </InputLabel>
+      <Select
+        labelId="team-select-label"
+        id="team-select"
+        value={items}
+        label="Time Responsável"
+        // onChange={handleExpertiseChange}
+      >
+        {expertiseOptions.map((option) => (
+          <MenuItem key={option.value} value={option.value}>
+            {option.label}
+          </MenuItem>
+        ))}
+      </Select>
+    </FormControl> */}
                 </Grid>
               </FormDialog>
             </Box>
@@ -253,8 +263,8 @@ const PageProfissional = ({}: PageProfissionalProps) => {
         </Grid>
         <Grid item>
           <Image
-            src={"/people.svg"}
-            alt="people-ilustration"
+            src={"/project.svg"}
+            alt="project-ilustration"
             width={500}
             height={500}
           ></Image>
@@ -274,4 +284,4 @@ const PageProfissional = ({}: PageProfissionalProps) => {
   );
 };
 
-export default PageProfissional;
+export default PageProjeto;
