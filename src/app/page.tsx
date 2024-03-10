@@ -51,9 +51,8 @@ export default function Home() {
         </Tabs>
       </Box>
       {selectedTab === "profissional" && <PageProfissional />}
+      {selectedTab === "time" && <PageTime />}
+      {selectedTab === "projeto" && <PageProjeto />}
     </>
   );
 }
-
-//{selectedTab === "time" && <PageTime />}
-//{selectedTab === "projeto" && <PageProjeto />}
