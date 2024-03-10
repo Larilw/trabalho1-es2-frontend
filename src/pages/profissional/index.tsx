@@ -10,11 +10,12 @@ import {
   Tooltip,
   Fab,
   Typography,
+  TextFieldProps,
 } from "@mui/material";
 import SearchBar from "@/components/SearchBar";
 import AddIcon from "@mui/icons-material/Add";
 import CustomList from "@/components/List";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import ConfirmationDialog from "@/components/ConfirmationDialog";
 import FormDialog from "@/components/FormDialog";
@@ -28,10 +29,9 @@ import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import dayjs from "dayjs";
 import customParseFormat from "dayjs/plugin/customParseFormat";
+import InputMask from "react-input-mask";
 
-interface PageProfissionalProps {}
-
-const PageProfissional = ({}: PageProfissionalProps) => {
+const PageProfissional = () => {
   const [searchValue, setSearchValue] = useState("");
   const [openConfirmationDialog, setOpenConfirmationDialog] = useState(false);
   const [confirmationDeleteId, setConfirmationDeleteId] = useState<
@@ -46,27 +46,19 @@ const PageProfissional = ({}: PageProfissionalProps) => {
   const [date, setDate] = useState<Date | null>(null);
   const [expertise, setExpertise] = useState("");
   const [name, setName] = useState("");
+  const [cpf, setCpf] = useState("");
+  const [bairro, setBairro] = useState("");
+  const [numero, setNumero] = useState("");
+  const [cidade, setCidade] = useState("");
+  const [logradouro, setLogradouro] = useState("");
+  const [unidadeFederativa, setUnidadeFederativa] = useState("");
+  const [cep, setCep] = useState("");
+  const [cepNumerico, setCepNumerico] = useState<number | null>(null);
 
   dayjs.extend(customParseFormat);
   const formatoData = "DD/MM/YYYY";
   const dayjsComFormato = dayjs().format(formatoData);
   const adapter = new AdapterDayjs({ locale: dayjsComFormato });
-
-  const handleGenderChange = (event: SelectChangeEvent) => {
-    setGender(event.target.value as string);
-  };
-
-  const handleRaceChange = (event: SelectChangeEvent) => {
-    setRace(event.target.value as string);
-  };
-
-  const handleExpertiseChange = (event: SelectChangeEvent) => {
-    setExpertise(event.target.value as string);
-  };
-
-  const handleNameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setName(event.target.value);
-  };
 
   const items = [
     { name: "lari", id: 1 },
@@ -86,6 +78,34 @@ const PageProfissional = ({}: PageProfissionalProps) => {
     { name: "x", id: 15 },
     { name: "x", id: 16 },
   ];
+
+  const buscarEndereco = async (cep: Number) => {
+    console.log("viacep");
+    try {
+      const response = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
+      if (!response.ok) {
+        throw new Error("CEP não encontrado");
+      }
+      const data = await response.json();
+      setLogradouro(data.logradouro || "");
+      setBairro(data.bairro || "");
+      setCidade(data.localidade || "");
+      setUnidadeFederativa(data.uf || "");
+    } catch (error) {
+      console.error("Erro ao buscar o CEP:", error);
+    }
+  };
+
+  useEffect(() => {
+    if (
+      cepNumerico &&
+      cepNumerico.toString().length === 8 &&
+      !isNaN(cepNumerico)
+    ) {
+      buscarEndereco(cepNumerico);
+    }
+  }, [cepNumerico]);
+
   return (
     <>
       <Grid container gap={3}>
@@ -160,77 +180,191 @@ const PageProfissional = ({}: PageProfissionalProps) => {
                     console.log("INFO: ", name, date, gender, race, expertise);
                   } else if (confirmed && confirmationSaveId === null) {
                     console.log("Criar usuário com as informações");
+                  } else {
+                    setName("");
+                    setDate(null);
+                    setGender("");
+                    setRace("");
+                    setExpertise("");
+                    setCpf("");
+                    setBairro("");
+                    setNumero("");
+                    setCidade("");
+                    setLogradouro("");
+                    setUnidadeFederativa("");
+                    setCep("");
+                    setCepNumerico(null);
                   }
                   setConfirmationSaveId(null);
                 }}
               >
-                <Grid
-                  container
-                  width={"32rem"}
-                  justifyContent={"center"}
-                  gap={1}
-                >
-                  <Typography variant="h5">Dados do Profissional</Typography>
-                  <TextField
-                    fullWidth
-                    id="outlined-basic"
-                    label="Nome completo"
-                    variant="outlined"
-                    onChange={handleNameChange}
-                  />
-                  <LocalizationProvider dateAdapter={AdapterDayjs}>
-                    <DemoContainer components={["DatePicker"]}>
+                <Grid container justifyContent={"left"} gap={2}>
+                  <Grid item xs={12}>
+                    <Typography variant="h5">Dados do Profissional</Typography>
+                  </Grid>
+                  <Grid item>
+                    <Typography variant="subtitle1">Dados Pessoais</Typography>
+                  </Grid>
+                  <Grid item xs={12}>
+                    <TextField
+                      fullWidth
+                      id="outlined-basic"
+                      label="Nome completo"
+                      variant="outlined"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                    />
+                  </Grid>
+                  <Grid item width={"13rem"}>
+                    <LocalizationProvider dateAdapter={AdapterDayjs}>
                       <DatePicker
                         label="Data de Nascimento"
                         format="DD/MM/YYYY"
                         onChange={(newDate: Date | null) => setDate(newDate)}
                       />
-                    </DemoContainer>
-                  </LocalizationProvider>
-                  <FormControl fullWidth>
-                    <InputLabel id="gender-select-label">Gênero</InputLabel>
-                    <Select
-                      labelId="gender-select-label"
-                      id="gender-select"
-                      value={gender}
-                      label="Gender"
-                      onChange={handleGenderChange}
+                    </LocalizationProvider>
+                  </Grid>
+                  <Grid item width={"10rem"}>
+                    <InputMask
+                      mask="999.999.999-99"
+                      value={cpf}
+                      onChange={(e) => setCpf(e.target.value)}
+                      disabled={false}
+                      maskChar=" "
                     >
-                      <MenuItem value={"fem"}>Feminino</MenuItem>
-                      <MenuItem value={"mas"}>Masculino</MenuItem>
-                      <MenuItem value={"nonbi"}>Não binário</MenuItem>
-                    </Select>
-                  </FormControl>
-                  <FormControl fullWidth>
-                    <InputLabel id="racial-select-label">Raça</InputLabel>
-                    <Select
-                      labelId="racial-select-label"
-                      id="racial-select"
-                      value={race}
-                      label="Race"
-                      onChange={handleRaceChange}
+                      {() => <TextField label="CPF" variant="outlined" />}
+                    </InputMask>
+                  </Grid>
+                  <Grid item xs={3}>
+                    <FormControl fullWidth>
+                      <InputLabel id="gender-select-label">Gênero</InputLabel>
+                      <Select
+                        labelId="gender-select-label"
+                        id="gender-select"
+                        value={gender}
+                        label="Gênero"
+                        onChange={(e) => setGender(e.target.value)}
+                      >
+                        <MenuItem value={"fem"}>Feminino</MenuItem>
+                        <MenuItem value={"mas"}>Masculino</MenuItem>
+                        <MenuItem value={"nonbi"}>Não binário</MenuItem>
+                      </Select>
+                    </FormControl>
+                  </Grid>
+                  <Grid item xs={3}>
+                    <FormControl fullWidth>
+                      <InputLabel id="racial-select-label">Raça</InputLabel>
+                      <Select
+                        labelId="racial-select-label"
+                        id="racial-select"
+                        value={race}
+                        label="Raça"
+                        onChange={(e) => setRace(e.target.value)}
+                      >
+                        <MenuItem value={"white"}>Branco</MenuItem>
+                        <MenuItem value={"yellow"}>Amarelo</MenuItem>
+                      </Select>
+                    </FormControl>
+                  </Grid>
+                  <Grid item width={"13rem"}>
+                    <FormControl fullWidth>
+                      <InputLabel id="expertise-select-label">
+                        Especialidade
+                      </InputLabel>
+                      <Select
+                        labelId="expertise-select-label"
+                        id="expertise-select"
+                        value={expertise}
+                        label="Especialidade"
+                        onChange={(e) => setExpertise(e.target.value)}
+                      >
+                        <MenuItem value={"fullstack"}>
+                          Desenvolvedor fullstack
+                        </MenuItem>
+                        <MenuItem value={"back"}>
+                          Desenvolvedor backend
+                        </MenuItem>
+                      </Select>
+                    </FormControl>
+                  </Grid>
+                  <Grid item xs={12}>
+                    <Typography variant="subtitle1">Endereço</Typography>
+                  </Grid>
+                  <Grid item width={"6.7rem"}>
+                    <InputMask
+                      mask="99999-999"
+                      value={cep}
+                      onChange={(e) => {
+                        const cepDigits = e.target.value.replace(/\D/g, ""); // Remove todos os caracteres não numéricos
+                        setCep(e.target.value);
+                        setCepNumerico(
+                          cepDigits !== "" ? parseInt(cepDigits, 10) : null // Converte para null ou para o número do cep
+                        );
+                      }}
+                      maskChar=" "
                     >
-                      <MenuItem value={"white"}>Branco</MenuItem>
-                      <MenuItem value={"yellow"}>Amarelo</MenuItem>
-                    </Select>
-                  </FormControl>
-                  <FormControl fullWidth>
-                    <InputLabel id="expertise-select-label">
-                      Especialidade
-                    </InputLabel>
-                    <Select
-                      labelId="expertise-select-label"
-                      id="expertise-select"
-                      value={expertise}
-                      label="Expertise"
-                      onChange={handleExpertiseChange}
-                    >
-                      <MenuItem value={"fullstack"}>
-                        Desenvolvedor fullstack
-                      </MenuItem>
-                      <MenuItem value={"back"}>Desenvolvedor backend</MenuItem>
-                    </Select>
-                  </FormControl>
+                      {() => (
+                        <TextField
+                          fullWidth
+                          id="outlined-basic"
+                          label="CEP"
+                          variant="outlined"
+                          type="text"
+                        />
+                      )}
+                    </InputMask>
+                  </Grid>
+                  <Grid item width={"25.7rem"}>
+                    <TextField
+                      fullWidth
+                      id="outlined-basic"
+                      label="Logradouro"
+                      variant="outlined"
+                      value={logradouro}
+                      onChange={(e) => setLogradouro(e.target.value)}
+                    />
+                  </Grid>
+                  <Grid item width={"6.7rem"}>
+                    <TextField
+                      fullWidth
+                      id="outlined-basic"
+                      label="Número"
+                      variant="outlined"
+                      value={numero}
+                      type="number"
+                      onChange={(e) => setNumero(e.target.value)}
+                    />
+                  </Grid>
+                  <Grid item width={"3.5rem"}>
+                    <TextField
+                      fullWidth
+                      id="outlined-basic"
+                      label="UF"
+                      variant="outlined"
+                      value={unidadeFederativa}
+                      onChange={(e) => setUnidadeFederativa(e.target.value)}
+                    />
+                  </Grid>
+                  <Grid item width={"21.2rem"}>
+                    <TextField
+                      fullWidth
+                      id="outlined-basic"
+                      label="Cidade"
+                      variant="outlined"
+                      value={cidade}
+                      onChange={(e) => setCidade(e.target.value)}
+                    />
+                  </Grid>
+                  <Grid item xs={4}>
+                    <TextField
+                      fullWidth
+                      id="outlined-basic"
+                      label="Bairro"
+                      variant="outlined"
+                      value={bairro}
+                      onChange={(e) => setBairro(e.target.value)}
+                    />
+                  </Grid>
                 </Grid>
               </FormDialog>
             </Box>
