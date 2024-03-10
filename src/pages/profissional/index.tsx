@@ -121,6 +121,59 @@ const PageProfissional = () => {
     fetchData();
   }, []);
 
+  const handleClickCadastrar = async () => {
+    console.log("TENTOU CADASTRAR");
+    try {
+      const responseCadastro = await fetchDados(
+        "profissional/inserir",
+        "POST",
+        {
+          nomeCompleto: name,
+          nomeSocial: "",
+          cpf,
+          dataNascimento: date?.toISOString().split("T")[0] || "",
+          raca: race,
+          genero: gender,
+          nroEndereco: numero,
+          complementoEndereco: "",
+          cep,
+          especialidade: expertise,
+          time: { idTime: 1, nomeTime: "" },
+          endereco: {
+            idEndereco: 1,
+            logradouro,
+            bairro,
+            cidade,
+            unidadeFederativa,
+          },
+        }
+      );
+
+      console.log(responseCadastro);
+      if (!responseCadastro.ok) {
+        throw new Error("Erro ao cadastrar profissional");
+      }
+
+      console.log("Cadastrou profissional");
+    } catch (error) {
+      console.error("Erro ao cadastrar profissional:", error);
+    }
+  };
+
+  const handleClickExcluir = async (id: number) => {
+    try {
+      const responseExclusao = await fetchDados(`projeto/excluir/${id}`, "PUT");
+
+      if (!responseExclusao.ok) {
+        throw new Error("Erro ao excluir projeto");
+      }
+
+      console.log("Excluiu projeto com ID:", id);
+    } catch (error) {
+      console.error("Erro ao excluir projeto:", error);
+    }
+  };
+
   return (
     <>
       <Grid container gap={3}>
@@ -197,7 +250,7 @@ const PageProfissional = () => {
                     );
                     console.log("INFO: ", name, date, gender, race, expertise);
                   } else if (confirmed && confirmationSaveId === null) {
-                    console.log("Criar usuário com as informações");
+                    handleClickCadastrar();
                   } else {
                     setName("");
                     setDate(null);
