@@ -32,6 +32,7 @@ import React from "react";
 import { NumericFormat } from "react-number-format";
 import { fetchDados } from "@/fetch";
 import { Projeto } from "@/models/Projeto";
+import { Time } from "@/models/Time";
 
 interface PriceInputProps {
   price: string;
@@ -74,6 +75,10 @@ const PageProjeto = () => {
   const [client, setClient] = useState("");
   const [description, setDescription] = useState("");
   const [price, setPrice] = useState("");
+  const [projetos, setProjetos] = useState<Projeto[]>([]);
+  const [clientes, setClientes] = useState([]);
+  const [times, setTimes] = useState([]);
+  const [timeSelecionado, setTimeSelecionado] = React.useState("");
 
   dayjs.extend(customParseFormat);
   const formatoData = "DD/MM/YYYY";
@@ -101,25 +106,22 @@ const PageProjeto = () => {
   };
   /* Lista do modal*/
 
-  const projetos = [
-    { name: "lari", id: 1 },
-    { name: "vic", id: 2 },
-    { name: "x", id: 3 },
-    { name: "x", id: 4 },
-    { name: "x", id: 5 },
-    { name: "x", id: 6 },
-    { name: "x", id: 7 },
-    { name: "x", id: 8 },
-    { name: "x", id: 9 },
-  ];
-
   useEffect(() => {
     const fetchData = async () => {
-      const responseListar = await fetchDados(
-        "projeto/listar",
-        "GET"
-      );
-      console.log(responseListar);
+      try {
+        const responseProjetos = await fetchDados("projeto/listar", "GET");
+        setProjetos(responseProjetos.result);
+      } catch (error) {
+        console.error("Erro ao listar projetos:", error);
+      }
+
+      try {
+        // Pega a listagem de times para fornecer durante o cadastro
+        const responseTimes = await fetchDados("time/listar/", "GET");
+        setTimes(responseTimes);
+      } catch (error) {
+        console.error("Erro ao listar times:", error);
+      }
     };
     fetchData();
   }, []);
@@ -131,13 +133,19 @@ const PageProjeto = () => {
       dataInicio: "2000-02-01",
       dataTermino: "2000-02-09",
       valor: 1000,
+      Cliente_idCliente: 1,
+      Time_idTime: 1,
     });
     console.log("Cadastrou projeto");
   };
 
   const handleClickExcluir = async () => {
-    const responseCadastro = await fetchDados("projeto/excluir/1", "PUT",);
+    const responseCadastro = await fetchDados("projeto/excluir/${confirmationDeleteId}", "PUT");
     console.log("Exlcuiu projeto");
+  };
+
+  const handleChangeTime = (event: { target: { value: React.SetStateAction<string>; }; }) => {
+    setTimeSelecionado(event.target.value);
   };
 
   return (
@@ -177,7 +185,10 @@ const PageProjeto = () => {
               sx={{ backgroundColor: "background.paper", borderRadius: "1rem" }}
             >
               <CustomList
-                items={projetos}
+                items={projetos.map((projeto) => ({
+                  name: projeto.nomeProjeto,
+                  id: projeto.idProjeto,
+                }))}
                 onClick={(id) => {
                   setConfirmationSaveId(id);
                   setOpenFormDialog(true);
@@ -298,11 +309,15 @@ const PageProjeto = () => {
                       <InputLabel id="team-select-label">
                         Time Responsável
                       </InputLabel>
-                      <Select
-                        labelId="team-select-label"
-                        id="team-select"
-                        label="Time Responsável"
-                      ></Select>
+                      <Select label="Time Responsável" value={timeSelecionado} onChange={handleChangeTime}>
+                       {/*times &&
+                         times.map((time: Time) => {
+                           return (
+                             <MenuItem value={time.idTime}>{time.nomeTime}</MenuItem>
+                           );
+                         })
+                         */}
+                      </Select>
                     </FormControl>
                   </Grid>
                 </Grid>
@@ -312,7 +327,7 @@ const PageProjeto = () => {
               color="secondary"
               aria-label="add"
               onClick={(id) => {
-                handleClickCadastrar;
+                handleClickCadastrar();
                 setName("");
                 setBeginDate(null);
                 setEndDate(null);
