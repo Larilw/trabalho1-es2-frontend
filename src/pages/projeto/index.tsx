@@ -18,7 +18,7 @@ import {
 import SearchBar from "@/components/SearchBar";
 import AddIcon from "@mui/icons-material/Add";
 import CustomList from "@/components/List";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import ConfirmationDialog from "@/components/ConfirmationDialog";
 import FormDialog from "@/components/FormDialog";
@@ -26,10 +26,12 @@ import { DemoContainer } from "@mui/x-date-pickers/internals/demo";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
-import dayjs from "dayjs";
+import dayjs, { Dayjs } from "dayjs";
 import customParseFormat from "dayjs/plugin/customParseFormat";
 import React from "react";
 import { NumericFormat } from "react-number-format";
+import { fetchDados } from "@/fetch";
+import { Projeto } from "@/models/Projeto";
 
 interface PriceInputProps {
   price: string;
@@ -99,7 +101,7 @@ const PageProjeto = () => {
   };
   /* Lista do modal*/
 
-  const items = [
+  const projetos = [
     { name: "lari", id: 1 },
     { name: "vic", id: 2 },
     { name: "x", id: 3 },
@@ -109,14 +111,34 @@ const PageProjeto = () => {
     { name: "x", id: 7 },
     { name: "x", id: 8 },
     { name: "x", id: 9 },
-    { name: "x", id: 10 },
-    { name: "x", id: 11 },
-    { name: "x", id: 12 },
-    { name: "x", id: 13 },
-    { name: "x", id: 14 },
-    { name: "x", id: 15 },
-    { name: "x", id: 16 },
   ];
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const responseListar = await fetchDados(
+        "projeto/listar",
+        "GET"
+      );
+      console.log(responseListar);
+    };
+    fetchData();
+  }, []);
+
+  const handleClickCadastrar = async () => {
+    const responseCadastro = await fetchDados("projeto/inserir", "POST", {
+      nomeProjeto: "Teste consumo",
+      objetivo: "Conseguir consumir",
+      dataInicio: "2000-02-01",
+      dataTermino: "2000-02-09",
+      valor: 1000,
+    });
+    console.log("Cadastrou projeto");
+  };
+
+  const handleClickExcluir = async () => {
+    const responseCadastro = await fetchDados("projeto/excluir/1", "PUT",);
+    console.log("Exlcuiu projeto");
+  };
 
   return (
     <>
@@ -155,7 +177,7 @@ const PageProjeto = () => {
               sx={{ backgroundColor: "background.paper", borderRadius: "1rem" }}
             >
               <CustomList
-                items={items}
+                items={projetos}
                 onClick={(id) => {
                   setConfirmationSaveId(id);
                   setOpenFormDialog(true);
@@ -172,7 +194,7 @@ const PageProjeto = () => {
                 setOpen={setOpenConfirmationDialog}
                 setConfirmation={(confirmed) => {
                   if (confirmed && confirmationDeleteId !== null) {
-                    // Faça a lógica de exclusão aqui
+                    handleClickExcluir();
                     console.log("Excluir item com ID:", confirmationDeleteId);
                   }
                   setConfirmationDeleteId(null);
@@ -248,9 +270,9 @@ const PageProjeto = () => {
                         <DatePicker
                           label="Data de Início"
                           format="DD/MM/YYYY"
-                          defaultValue={dayjs(new Date())}
-                          onChange={(newDate: Date | null) =>
-                            setBeginDate(newDate)
+                          value={dayjs()}
+                          onChange={(newDate: Dayjs | null) =>
+                            setBeginDate(dayjs(newDate).toDate())
                           }
                         />
                       </LocalizationProvider>
@@ -260,9 +282,9 @@ const PageProjeto = () => {
                         <DatePicker
                           label="Data de Término"
                           format="DD/MM/YYYY"
-                          defaultValue={dayjs(new Date())}
-                          onChange={(newDate: Date | null) =>
-                            setEndDate(newDate)
+                          defaultValue={dayjs()}
+                          onChange={(newDate: Dayjs | null) =>
+                            setEndDate(dayjs(newDate).toDate())
                           }
                         />
                       </LocalizationProvider>
@@ -290,6 +312,7 @@ const PageProjeto = () => {
               color="secondary"
               aria-label="add"
               onClick={(id) => {
+                handleClickCadastrar;
                 setName("");
                 setBeginDate(null);
                 setEndDate(null);

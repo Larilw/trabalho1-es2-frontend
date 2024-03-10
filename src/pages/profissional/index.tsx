@@ -27,7 +27,7 @@ import { DemoContainer } from "@mui/x-date-pickers/internals/demo";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
-import dayjs from "dayjs";
+import dayjs, { Dayjs } from "dayjs";
 import customParseFormat from "dayjs/plugin/customParseFormat";
 import InputMask from "react-input-mask";
 
@@ -220,7 +220,10 @@ const PageProfissional = () => {
                       <DatePicker
                         label="Data de Nascimento"
                         format="DD/MM/YYYY"
-                        onChange={(newDate: Date | null) => setDate(newDate)}
+                        defaultValue={dayjs()}
+                        onChange={(newDate: Dayjs | null) =>
+                          setDate(dayjs(newDate).toDate())
+                        }
                       />
                     </LocalizationProvider>
                   </Grid>
@@ -232,7 +235,7 @@ const PageProfissional = () => {
                       disabled={false}
                       maskChar=" "
                     >
-                      {() => <TextField label="CPF" variant="outlined" />}
+                      <TextField label="CPF" variant="outlined" />
                     </InputMask>
                   </Grid>
                   <Grid item xs={3}>
@@ -303,15 +306,13 @@ const PageProfissional = () => {
                       }}
                       maskChar=" "
                     >
-                      {() => (
-                        <TextField
-                          fullWidth
-                          id="outlined-basic"
-                          label="CEP"
-                          variant="outlined"
-                          type="text"
-                        />
-                      )}
+                      <TextField
+                        fullWidth
+                        id="outlined-basic"
+                        label="CEP"
+                        variant="outlined"
+                        type="text"
+                      />
                     </InputMask>
                   </Grid>
                   <Grid item width={"25.7rem"}>

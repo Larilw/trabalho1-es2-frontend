@@ -70,6 +70,8 @@ const PageProjeto = () => {
     { name: "vic", id: 2, expertise: "frontend" },
   ];
 
+  
+
   return (
     <>
       <Grid container gap={3}>
