@@ -151,7 +151,7 @@ const PageProjeto = () => {
                   container
                   width={"32rem"}
                   justifyContent={"center"}
-                  gap={1}
+                  gap={2}
                 >
                   <Typography variant="h5">Dados do Time</Typography>
                   <TextField

@@ -10,6 +10,10 @@ import {
   Tooltip,
   Fab,
   Typography,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
 } from "@mui/material";
 import SearchBar from "@/components/SearchBar";
 import AddIcon from "@mui/icons-material/Add";
@@ -25,6 +29,29 @@ import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import dayjs from "dayjs";
 import customParseFormat from "dayjs/plugin/customParseFormat";
 import React from "react";
+import { NumericFormat } from "react-number-format";
+
+interface PriceInputProps {
+  price: string;
+  setPrice: (price: string) => void;
+}
+
+function PriceInput({ price, setPrice }: PriceInputProps) {
+  return (
+    <NumericFormat
+      value={price}
+      thousandSeparator={true}
+      prefix={"R$ "}
+      onValueChange={(values) => {
+        setPrice(values.value);
+      }}
+      customInput={TextField}
+      label="Preço"
+      variant="outlined"
+      fullWidth
+    />
+  );
+}
 
 const PageProjeto = () => {
   const [searchValue, setSearchValue] = useState("");
@@ -38,10 +65,13 @@ const PageProjeto = () => {
   const [openFormDialog, setOpenFormDialog] = useState(false);
   const [gender, setGender] = useState("");
   const [race, setRace] = useState("");
-  const [date, setDate] = useState<Date | null>(null);
+  const [beginDate, setBeginDate] = useState<Date | null>(null);
+  const [endDate, setEndDate] = useState<Date | null>(null);
   const [expertise, setExpertise] = useState("");
   const [name, setName] = useState("");
-  const [price, setPrice] = useState<string | null>(null);
+  const [client, setClient] = useState("");
+  const [description, setDescription] = useState("");
+  const [price, setPrice] = useState("");
 
   dayjs.extend(customParseFormat);
   const formatoData = "DD/MM/YYYY";
@@ -158,89 +188,101 @@ const PageProjeto = () => {
                       "Salvar informações do id:",
                       confirmationSaveId
                     );
-                    console.log("INFO: ", name, date, gender, race, expertise);
+                    console.log(
+                      "INFO: ",
+                      name,
+                      beginDate,
+                      endDate,
+                      gender,
+                      race,
+                      expertise
+                    );
                   } else if (confirmed && confirmationSaveId === null) {
                     console.log("Criar usuário com as informações");
                   }
                   setConfirmationSaveId(null);
                 }}
               >
-                <Grid
-                  container
-                  width={"32rem"}
-                  justifyContent={"center"}
-                  gap={1}
-                >
-                  <Typography variant="h5">Dados do Projeto</Typography>
-                  <TextField
-                    fullWidth
-                    id="outlined-basic"
-                    label="Nome do Projeto"
-                    variant="outlined"
-                    onChange={handleNameChange}
-                  />
-                  <TextField
-                    fullWidth
-                    id="outlined-basic"
-                    label="Nome do Cliente"
-                    variant="outlined"
-                    onChange={handleNameChange}
-                  />
-                  <TextField
-                    fullWidth
-                    id="outlined-basic"
-                    label="Objetivo do Projeto"
-                    variant="outlined"
-                    onChange={handleNameChange}
-                  />
-                  <LocalizationProvider dateAdapter={AdapterDayjs}>
-                    <DemoContainer components={["DatePicker"]}>
-                      <DatePicker
-                        label="Data de Início"
-                        format="DD/MM/YYYY"
-                        onChange={(newDate: Date | null) => setDate(newDate)}
-                      />
-                    </DemoContainer>
-                  </LocalizationProvider>
-                  <LocalizationProvider dateAdapter={AdapterDayjs}>
-                    <DemoContainer components={["DatePicker"]}>
-                      <DatePicker
-                        label="Data de Término"
-                        format="DD/MM/YYYY"
-                        onChange={(newDate: Date | null) => setDate(newDate)}
-                      />
-                    </DemoContainer>
-                  </LocalizationProvider>
-                  {/*
-                  <TextField
-                    label="react-number-format"
-                    value={values.toFixed(2)}
-                    onChange={handleChange}
-                    name="numberformat"
-                    id="formatted-numberformat-input"
-                    InputProps={{
-                      inputComponent: NumberFormatCustom,
-                    }}
-                  />
-                   */}
-                  {/* <FormControl fullWidth>
-      <InputLabel id="team-select-label">
-        Time responsável
-      </InputLabel>
-      <Select
-        labelId="team-select-label"
-        id="team-select"
-        value={items}
-        label="Time Responsável"
-        // onChange={handleExpertiseChange}
-      >
-        {expertiseOptions.map((option) => (
-          <MenuItem key={option.value} value={option.value}>
-            {option.label}
-          </MenuItem>
-        ))}
-      </Select>
-    </FormControl> */}
+                <Grid container width={"32rem"} justifyContent={"left"} gap={2}>
+                  <Grid item xs={12}>
+                    <Typography variant="h5">Dados do Projeto</Typography>
+                  </Grid>
+                  <Grid item xs={12}>
+                    <TextField
+                      fullWidth
+                      id="outlined-basic"
+                      label="Nome do Projeto"
+                      variant="outlined"
+                      onChange={handleNameChange}
+                    />
+                  </Grid>
+                  <Grid item xs={12}>
+                    <TextField
+                      fullWidth
+                      id="outlined-basic"
+                      label="Nome do Cliente"
+                      variant="outlined"
+                      onChange={handleNameChange}
+                    />
+                  </Grid>
+                  <Grid item width={"19.5rem"}>
+                    <TextField
+                      fullWidth
+                      id="outlined-basic"
+                      label="Objetivo do Projeto"
+                      variant="outlined"
+                      multiline
+                      rows={4.1}
+                      onChange={handleNameChange}
+                    />
+                  </Grid>
+                  <Grid
+                    container
+                    item
+                    width={"11.5rem"}
+                    flexDirection={"column"}
+                    gap={2}
+                  >
+                    <Grid item width={"11.5rem"}>
+                      <LocalizationProvider dateAdapter={AdapterDayjs}>
+                        <DatePicker
+                          label="Data de Início"
+                          format="DD/MM/YYYY"
+                          defaultValue={dayjs(new Date())}
+                          onChange={(newDate: Date | null) =>
+                            setBeginDate(newDate)
+                          }
+                        />
+                      </LocalizationProvider>
+                    </Grid>
+                    <Grid item width={"11.5rem"}>
+                      <LocalizationProvider dateAdapter={AdapterDayjs}>
+                        <DatePicker
+                          label="Data de Término"
+                          format="DD/MM/YYYY"
+                          defaultValue={dayjs(new Date())}
+                          onChange={(newDate: Date | null) =>
+                            setEndDate(newDate)
+                          }
+                        />
+                      </LocalizationProvider>
+                    </Grid>
+                  </Grid>
+                  <Grid item width={"10rem"}>
+                    <PriceInput price={price} setPrice={setPrice} />
+                  </Grid>
+                  <Grid item width={"21rem"}>
+                    <FormControl fullWidth>
+                      <InputLabel id="team-select-label">
+                        Time Responsável
+                      </InputLabel>
+                      <Select
+                        labelId="team-select-label"
+                        id="team-select"
+                        label="Time Responsável"
+                      ></Select>
+                    </FormControl>
+                  </Grid>
                 </Grid>
               </FormDialog>
             </Box>
@@ -249,7 +291,8 @@ const PageProjeto = () => {
               aria-label="add"
               onClick={(id) => {
                 setName("");
-                setDate(null);
+                setBeginDate(null);
+                setEndDate(null);
                 setExpertise("");
                 setRace("");
                 setGender("");
