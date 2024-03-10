@@ -30,6 +30,8 @@ import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import dayjs, { Dayjs } from "dayjs";
 import customParseFormat from "dayjs/plugin/customParseFormat";
 import InputMask from "react-input-mask";
+import { fetchDados } from "@/fetch";
+import { Profissional } from "@/models/Profissional";
 
 const PageProfissional = () => {
   const [searchValue, setSearchValue] = useState("");
@@ -54,6 +56,7 @@ const PageProfissional = () => {
   const [unidadeFederativa, setUnidadeFederativa] = useState("");
   const [cep, setCep] = useState("");
   const [cepNumerico, setCepNumerico] = useState<number | null>(null);
+  const [profissionais, setProfissionais] = useState<Profissional[]>([]);
 
   dayjs.extend(customParseFormat);
   const formatoData = "DD/MM/YYYY";
@@ -106,6 +109,18 @@ const PageProfissional = () => {
     }
   }, [cepNumerico]);
 
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await fetchDados("profissional/listar", "GET");
+        setProfissionais(response.result);
+      } catch (error) {
+        console.error("Erro ao buscar profissionais:", error);
+      }
+    };
+    fetchData();
+  }, []);
+
   return (
     <>
       <Grid container gap={3}>
@@ -144,7 +159,10 @@ const PageProfissional = () => {
               sx={{ backgroundColor: "background.paper", borderRadius: "1rem" }}
             >
               <CustomList
-                items={items}
+                items={profissionais.map((profissional) => ({
+                  name: profissional.nomeCompleto,
+                  id: profissional.idProfissional,
+                }))}
                 onClick={(id) => {
                   setConfirmationSaveId(id);
                   setOpenFormDialog(true);

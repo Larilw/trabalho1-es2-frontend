@@ -1,5 +1,4 @@
 export async function fetchDados(url: string, method: string, content?: any) {
-  console.log(url);
   const options: RequestInit = {
     method,
     headers: {
@@ -11,9 +10,10 @@ export async function fetchDados(url: string, method: string, content?: any) {
     options.body = JSON.stringify(content);
   }
 
-  console.log("options", options);
-
-  const response = await fetch("http://localhost:3300/empresa-tec/" + url, options);
+  const response = await fetch(
+    "http://localhost:3000/empresa-tec/" + url,
+    options
+  );
   const dados = await response.json();
 
   if (!response.ok) {
