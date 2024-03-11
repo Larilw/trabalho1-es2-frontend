@@ -22,7 +22,7 @@ Implementação do frontend do 1º trabalho da disciplina de Engenharia de Softw
 
 ## Descrição
 
-O projeto consiste numa aplicação de Cadastros de Projetos utilizando o framework SCRUM. Essa é a implementação do frontend da aplicação. A aplicação encontra-se hospedada em: []() para acesso público.
+O projeto consiste numa aplicação de Cadastros de Projetos utilizando o framework SCRUM. Essa é a implementação do frontend da aplicação. A aplicação encontra-se hospedada em: [https://t1-es2-frontend-648c67252b2e.herokuapp.com/](https://t1-es2-frontend-648c67252b2e.herokuapp.com/) para acesso público.
 
 ---
 
