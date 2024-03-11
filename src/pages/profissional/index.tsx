@@ -32,6 +32,8 @@ import customParseFormat from "dayjs/plugin/customParseFormat";
 import InputMask from "react-input-mask";
 import { fetchDados } from "@/fetch";
 import { Profissional } from "@/models/Profissional";
+import { Especialidade } from "@/models/Especialidade";
+import React from "react";
 
 const PageProfissional = () => {
   const [searchValue, setSearchValue] = useState("");
@@ -47,7 +49,6 @@ const PageProfissional = () => {
   const [formattedBornDate, setFormattedBornDate] = useState("");
   const [gender, setGender] = useState("");
   const [race, setRace] = useState("");
-  const [date, setDate] = useState<Date | null>(null);
   const [expertise, setExpertise] = useState("");
   const [name, setName] = useState("");
   const [cpf, setCpf] = useState("");
@@ -59,6 +60,8 @@ const PageProfissional = () => {
   const [cidade, setCidade] = useState("");
   const [unidadeFederativa, setUnidadeFederativa] = useState("");
   const [profissionais, setProfissionais] = useState<Profissional[]>([]);
+  const [especialidades, setEspecialidades] = useState<Especialidade[]>([]);
+  const [especialidadeSelecionada, setEspecialidadeSelecionada] = React.useState<Number>();
 
   dayjs.extend(customParseFormat);
   const formatoData = "DD/MM/YYYY";
@@ -129,7 +132,6 @@ const PageProfissional = () => {
           idEspecialidade: 1,
         }
       );
-      console.log(responseCadastro);
       if (!responseCadastro.ok) {
         throw new Error("Erro ao cadastrar profissional");
       }
@@ -142,34 +144,69 @@ const PageProfissional = () => {
   };
 
   const handleClickBuscar = async (id: number) => {
-    try {
-      const responseBusca = await fetchDados(`profissional/buscar/${id}`, "GET");
-      if (!responseBusca.ok) {
-        throw new Error("Erro ao buscar profissional");
+    const fetchData = async () => {
+      try {
+        const responseBusca = await fetchDados(`profissional/buscar/${id}`, "GET");
+        const profissional = responseBusca.result;
+
+        setName(profissional.nomeCompleto);
+        setFormattedBornDate(profissional.dataNascimento);
+        setBornDate(new Date(profissional.dataNascimento));
+        setGender(profissional.genero);
+        setRace(profissional.raca);
+        setExpertise(profissional.especialidade);
+        setCpf(profissional.cpf);
+        setNumero(profissional.nroEndereco);
+
+        const responseEndereco = await fetchDados(`buscarEnderecoCompleto/${profissional.idEndereco}`, "GET");
+        const endereco = responseEndereco.result;
+        setCepNumerico(endereco.cep);
+        setLogradouro(endereco.logradouro);
+        setBairro(endereco.bairro);
+        setCidade(endereco.cidade);
+        setUnidadeFederativa(endereco.unidadeFederativa);
+
+        const responseEspecialidades = await fetchDados(`especialidade/listar`, "GET");
+        setEspecialidades(responseEspecialidades.result);
+      } catch (error) {
+        console.error("Erro ao buscar profissional:", error);
       }
-      /*
-      setName(responseBusca.nomeCompleto);
-      setDate(null);
-      setGender(responseBusca.genero);
-      setRace(responseBusca.raca);
-      setExpertise("");
-      setCpf(responseBusca.cpf);
-      setNumero(responseBusca.nroEndereco);
-      */
-      //setBairro(responseBusca.bairro);
-      //setCidade(responseBusca.cidade);
-      //setLogradouro(responseBusca.logradouro);
-      //setUnidadeFederativa(responseBusca.unidadeFederativa);
-      //setCep(responseBusca.cep);
-      //setCepNumerico(null);
-    } catch (error) {
-      console.error("Erro ao buscar profissional:", error);
-    }
+    };
+    fetchData();
+  };
+
+  const handleClickAlterar = async (id: number) => {
+    const formattedBornDate = bornDate ? dayjs(bornDate).format("YYYY-MM-DD") : "";
+    setFormattedBornDate(formattedBornDate);
+    
+    const responseBairro = await fetchDados("endereco/inserirBairro", "POST", {bairro: bairro});
+    const responseLogradouro = await fetchDados("endereco/inserirLogradouro", "POST", {logradouro: logradouro, idTipoLogradouro: 1});
+    const responseUnidadeFederativa = await fetchDados(`endereco/buscarIdUnidadeFederativa/${unidadeFederativa}`, "GET");
+    const responseCidade = await fetchDados("endereco/inserirCidade", "POST", {cidade: cidade, idUnidadeFederativa: 1});
+    const responseEndereco = await fetchDados("endereco/inserirEndereco", "POST", {cep: cep, idBairro: responseBairro.result.idBairro, idLogradouro: responseLogradouro.result.idLogradouro, idCidade: responseCidade.result.idCidade});
+    const responseAlteracao = await fetchDados(`profissional/alterar${id}`, "PUT", {
+        nomeCompleto: name,
+        nomeSocial: "",
+        cpf: cpf,
+        dataNascimento: formattedBornDate,
+        raca: race,
+        genero: gender,
+        nroEndereco: numero,
+        complementoEndereco: "",
+        cep,
+        idEndereco: responseEndereco.result.idEndereco,
+        idTime: 1,
+        idEspecialidade: 1,
+      }
+    );
+    console.log("Alterou profissional");
+    const responseListar = await fetchDados("profissional/listar", "GET");
+    setProfissionais(responseListar.result);
   };
 
   const handleClickExcluir = async (id: number) => {
     const responseExclusao = await fetchDados(`profissional/excluir/${id}`, "PUT");
-    console.log("Excluiu projeto");
+    console.log("Excluiu profissional");
     const responseListar = await fetchDados("profissional/listar", "GET");
     setProfissionais(responseListar.result);
   };
@@ -244,27 +281,9 @@ const PageProfissional = () => {
                 setOpen={setOpenFormDialog}
                 setConfirmation={(confirmed) => {
                   if (confirmed && confirmationSaveId !== null) {
-                    console.log(
-                      "Salvar informações do id:",
-                      confirmationSaveId
-                    );
-                    console.log("INFO: ", name, date, gender, race, expertise);
+                    handleClickAlterar(confirmationSaveId);
                   } else if (confirmed && confirmationSaveId === null) {
                     handleClickCadastrar();
-                  } else {
-                    setName("");
-                    setDate(null);
-                    setGender("");
-                    setRace("");
-                    setExpertise("");
-                    setCpf("");
-                    setBairro("");
-                    setNumero("");
-                    setCidade("");
-                    setLogradouro("");
-                    setUnidadeFederativa("");
-                    setCep("");
-                    setCepNumerico(null);
                   }
                   setConfirmationSaveId(null);
                 }}
@@ -290,10 +309,10 @@ const PageProfissional = () => {
                     <LocalizationProvider dateAdapter={AdapterDayjs}>
                       <DatePicker
                         label="Data de Nascimento"
+                        defaultValue={dayjs(bornDate)}
                         format="DD/MM/YYYY"
-                        defaultValue={dayjs()}
                         onChange={(newDate: Dayjs | null) =>
-                          setDate(dayjs(newDate).toDate())
+                          setBornDate(dayjs(newDate).toDate())
                         }
                       />
                     </LocalizationProvider>
@@ -353,14 +372,20 @@ const PageProfissional = () => {
                         id="expertise-select"
                         value={expertise}
                         label="Especialidade"
-                        onChange={(e) => setExpertise(e.target.value)}
+                        onChange={(e) => {
+                          setEspecialidadeSelecionada(e.target.value as unknown as Number);
+                        }}
+                        MenuProps={{
+                          PaperProps: { sx: { maxHeight: "8rem" } },
+                        }}
                       >
-                        <MenuItem value={"fullstack"}>
-                          Desenvolvedor fullstack
-                        </MenuItem>
-                        <MenuItem value={"back"}>
-                          Desenvolvedor backend
-                        </MenuItem>
+                        {Array.isArray(especialidades) &&
+                          especialidades.length > 0 &&
+                          especialidades.map((especialidade: Especialidade) => (
+                            <MenuItem key={especialidade.idEspecialidade} value={especialidade.idEspecialidade}>
+                              {especialidade.especialidade}
+                            </MenuItem>
+                          ))}
                       </Select>
                     </FormControl>
                   </Grid>
@@ -448,7 +473,7 @@ const PageProfissional = () => {
               aria-label="add"
               onClick={(id) => {
                 setName("");
-                setDate(null);
+                setBornDate(null);
                 setExpertise("");
                 setRace("");
                 setGender("");

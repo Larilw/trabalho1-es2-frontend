@@ -32,23 +32,17 @@ import Avatar from "@mui/material/Avatar";
 import React from "react";
 import { Time } from "@/models/Time";
 import { fetchDados } from "@/fetch";
+import { Profissional } from "@/models/Profissional";
 
 const PageProjeto = () => {
   const [searchValue, setSearchValue] = useState("");
   const [openConfirmationDialog, setOpenConfirmationDialog] = useState(false);
-  const [confirmationDeleteId, setConfirmationDeleteId] = useState<
-    number | null
-  >(null);
-  const [confirmationSaveId, setConfirmationSaveId] = useState<number | null>(
-    null
-  );
+  const [confirmationDeleteId, setConfirmationDeleteId] = useState<number | null>(null);
+  const [confirmationSaveId, setConfirmationSaveId] = useState<number | null>(null);
   const [openFormDialog, setOpenFormDialog] = useState(false);
   const [name, setName] = useState("");
   const [times, setTimes] = useState<Time[]>([]);
-
-  const handleNameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setName(event.target.value);
-  };
+  const [profissionais, setProfissionais] = useState<Profissional[]>([]);
 
   /*Lista do modal*/
   const [checked, setChecked] = React.useState<number[]>([]);
@@ -66,12 +60,6 @@ const PageProjeto = () => {
     setChecked(newChecked);
   };
   /* Lista do modal*/
-
-  // Membros do time
-  const equipeTime = [
-    { name: "lari", id: 20, expertise: "fullstack" },
-    { name: "vic", id: 2, expertise: "frontend" },
-  ];
 
   useEffect(() => {
     const fetchData = async () => {
@@ -98,6 +86,14 @@ const PageProjeto = () => {
         const responseProjetos = await fetchDados(`time/buscar/${id}`, "GET");
         const time = responseProjetos.result;
         setName(time.nomeTime);
+      } catch (error) {
+        console.error("Erro ao buscar time:", error);
+      }
+
+      try {
+        const responseProfissionais = await fetchDados("profissional/listar", "GET");
+        const profissionais = responseProfissionais.result;
+        setProfissionais(profissionais);
       } catch (error) {
         console.error("Erro ao buscar time:", error);
       }
@@ -234,25 +230,25 @@ const PageProjeto = () => {
                           bgcolor: "#edf2fb",
                         }}
                       >
-                        {equipeTime.map((value) => {
+                        {profissionais.map((value) => {
                           const labelId = `checkbox-list-secondary-label-${value}`;
                           return (
                             <ListItem
-                              key={value.id}
+                              key={value.idProfissional}
                               sx={{
                                 boxShadow: "0px 1px 1px 0px rgba(0,0,0,0.20)",
                               }}
                               secondaryAction={
                                 <Checkbox
                                   edge="end"
-                                  onChange={handleToggle(value.id)}
-                                  checked={checked.indexOf(value.id) !== -1}
+                                  onChange={handleToggle(value.idProfissional)}
+                                  checked={checked.indexOf(value.idProfissional) !== -1}
                                   inputProps={{ "aria-labelledby": labelId }}
                                 />
                               }
                               disablePadding
                             >
-                              <ListItemButton onClick={handleToggle(value.id)}>
+                              <ListItemButton onClick={handleToggle(value.idProfissional)}>
                                 <ListItemAvatar>
                                   <Avatar
                                     alt={`Avatar`}
@@ -261,7 +257,7 @@ const PageProjeto = () => {
                                 </ListItemAvatar>
                                 <ListItemText
                                   id={labelId}
-                                  primary={`${value.name} - ${value.expertise}`}
+                                  primary={`${value.nomeCompleto} - ${value.especialidade}`}
                                 />
                               </ListItemButton>
                             </ListItem>
@@ -276,9 +272,16 @@ const PageProjeto = () => {
             <Fab
               color="secondary"
               aria-label="add"
-              onClick={(id) => {
+              onClick={async (id) => {
                 setConfirmationSaveId(null);
                 setOpenFormDialog(true);
+                try {
+                  const responseProfissionais = await fetchDados("profissional/listar", "GET");
+                  const profissionais = responseProfissionais.result;
+                  setProfissionais(profissionais);
+                } catch (error) {
+                  console.error("Erro ao buscar time:", error);
+                }
               }}
             >
               <AddIcon />

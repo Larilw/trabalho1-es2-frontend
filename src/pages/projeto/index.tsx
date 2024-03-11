@@ -118,13 +118,11 @@ const PageProjeto = () => {
   }, []);
 
   const handleClickCadastrar = async () => {
-    const formattedBeginDate = beginDate
-      ? dayjs(beginDate).format("YYYY-MM-DD")
-      : "";
+    const formattedBeginDate = beginDate ? dayjs(beginDate).format("YYYY-MM-DD") : "";
     const formattedEndDate = endDate ? dayjs(endDate).format("YYYY-MM-DD") : "";
     setFormattedBeginDate(formattedBeginDate);
     setFormattedEndDate(formattedEndDate);
-    
+
     console.log("LOG DO REGISTRO", {
       nomeProjeto: name,
       objetivo: description,
@@ -154,7 +152,7 @@ const PageProjeto = () => {
       try {
         const responseBusca = await fetchDados(`projeto/buscar/${id}`, "GET");
         const projeto = responseBusca.result;
-
+/*
         console.log({
           name: projeto.nomeProjeto,
           client: projeto.cliente,
@@ -166,7 +164,7 @@ const PageProjeto = () => {
           price: projeto.valor,
           timeSelecionado: projeto.time,
         });
-
+*/
         setName(projeto.nomeProjeto);
         setClient(projeto.cliente);
         setDescription(projeto.objetivo);
@@ -180,7 +178,6 @@ const PageProjeto = () => {
         console.error("Erro ao buscar projeto:", error);
       }
     };
-
     fetchData();
   };
 

@@ -1,4 +1,5 @@
 import { Endereco } from "../Endereco";
+import { Especialidade } from "../Especialidade";
 import { Time } from "../Time";
 
 export interface Profissional {
@@ -12,7 +13,7 @@ export interface Profissional {
     nroEndereco: number;
     complementoEndereco: string;
     cep: string;
-    especialidade: string;
+    especialidade: Especialidade;
     time: Time;
     endereco: Endereco;
 }
