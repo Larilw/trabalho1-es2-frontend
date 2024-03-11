@@ -34,6 +34,7 @@ import { fetchDados } from "@/fetch";
 import { Profissional } from "@/models/Profissional";
 import { Especialidade } from "@/models/Especialidade";
 import React from "react";
+import { UnidadeFederativa } from "@/models/UnidadeFederativa";
 
 const PageProfissional = () => {
   const [searchValue, setSearchValue] = useState("");
@@ -61,6 +62,8 @@ const PageProfissional = () => {
   const [profissionais, setProfissionais] = useState<Profissional[]>([]);
   const [especialidades, setEspecialidades] = useState<Especialidade[]>([]);
   const [especialidadeSelecionada, setEspecialidadeSelecionada] = React.useState<Number>();
+  const [ufs, setUfs] = useState<UnidadeFederativa[]>([]);
+  const [ufSelecionada, setUfSelecionada] = React.useState<Number>();
 
   dayjs.extend(customParseFormat);
   const formatoData = "DD/MM/YYYY";
@@ -111,25 +114,25 @@ const PageProfissional = () => {
     setFormattedBornDate(formattedBornDate);
 
     try {
-      const responseBairro = await fetchDados("endereco/inserirBairro", "POST", {bairro: bairro});
-      const responseLogradouro = await fetchDados("endereco/inserirLogradouro", "POST", {logradouro: logradouro, idTipoLogradouro: 1});
-      const responseUnidadeFederativa = await fetchDados(`endereco/buscarIdUnidadeFederativa/${unidadeFederativa}`, "GET");
-      const responseCidade = await fetchDados("endereco/inserirCidade", "POST", {cidade: cidade, idUnidadeFederativa: 1});
-      const responseEndereco = await fetchDados("endereco/inserirEndereco", "POST", {cep: cep, idBairro: responseBairro.result.idBairro, idLogradouro: responseLogradouro.result.idLogradouro, idCidade: responseCidade.result.idCidade});
+      console.log(ufSelecionada)
+      const responseBairro = await fetchDados("endereco/inserirBairro", "POST", { bairro: bairro });
+      const responseLogradouro = await fetchDados("endereco/inserirLogradouro", "POST", { logradouro: logradouro, idTipoLogradouro: 1 });
+      const responseCidade = await fetchDados("endereco/inserirCidade", "POST", { cidade: cidade, idUnidadeFederativa: ufSelecionada });
+      const responseEndereco = await fetchDados("endereco/inserirEndereco", "POST", { cep: cep, idBairro: responseBairro.result.idBairro, idLogradouro: responseLogradouro.result.idLogradouro, idCidade: responseCidade.result.idCidade });
       const responseCadastro = await fetchDados("profissional/inserir", "POST", {
-          nomeCompleto: name,
-          nomeSocial: "",
-          cpf: cpf,
-          dataNascimento: formattedBornDate,
-          raca: race,
-          genero: gender,
-          nroEndereco: numero,
-          complementoEndereco: "",
-          cep,
-          idEndereco: responseEndereco.result.idEndereco,
-          idTime: 1,
-          idEspecialidade: especialidadeSelecionada,
-        }
+        nomeCompleto: name,
+        nomeSocial: "",
+        cpf: cpf,
+        dataNascimento: formattedBornDate,
+        raca: race,
+        genero: gender,
+        nroEndereco: numero,
+        complementoEndereco: "",
+        cep,
+        idEndereco: responseEndereco.result.idEndereco,
+        idTime: 1,
+        idEspecialidade: especialidadeSelecionada,
+      }
       );
       console.log("Cadastrou profissional");
     } catch (error) {
@@ -165,6 +168,9 @@ const PageProfissional = () => {
 
         const responseEspecialidades = await fetchDados(`especialidade/listar`, "GET");
         setEspecialidades(responseEspecialidades.result);
+
+        const responseUfs = await fetchDados(`endereco/listarUnidadesFederativas`, "GET");
+        setUfs(responseUfs.result);
       } catch (error) {
         console.error("Erro ao buscar profissional:", error);
       }
@@ -176,26 +182,25 @@ const PageProfissional = () => {
     const formattedBornDate = bornDate ? dayjs(bornDate).format("YYYY-MM-DD") : "";
     setFormattedBornDate(formattedBornDate);
     console.log("entrou no alterar")
-    const responseBairro = await fetchDados("endereco/inserirBairro", "POST", {bairro: bairro});
-    const responseLogradouro = await fetchDados("endereco/inserirLogradouro", "POST", {logradouro: logradouro, idTipoLogradouro: 1});
-    const responseUnidadeFederativa = await fetchDados(`endereco/buscarIdUnidadeFederativa/${unidadeFederativa}`, "GET");
-    const responseCidade = await fetchDados("endereco/inserirCidade", "POST", {cidade: cidade, idUnidadeFederativa: 1});
-    const responseEndereco = await fetchDados("endereco/inserirEndereco", "POST", {cep: cep, idBairro: responseBairro.result.idBairro, idLogradouro: responseLogradouro.result.idLogradouro, idCidade: responseCidade.result.idCidade});
+    const responseBairro = await fetchDados("endereco/inserirBairro", "POST", { bairro: bairro });
+    const responseLogradouro = await fetchDados("endereco/inserirLogradouro", "POST", { logradouro: logradouro, idTipoLogradouro: 1 });
+    const responseCidade = await fetchDados("endereco/inserirCidade", "POST", { cidade: cidade, idUnidadeFederativa: ufSelecionada });
+    const responseEndereco = await fetchDados("endereco/inserirEndereco", "POST", { cep: cep, idBairro: responseBairro.result.idBairro, idLogradouro: responseLogradouro.result.idLogradouro, idCidade: responseCidade.result.idCidade });
     const responseAlteracao = await fetchDados(`profissional/alterar/${id}`, "PUT", {
-        nomeCompleto: name,
-        nomeSocial: "",
-        cpf: cpf,
-        dataNascimento: formattedBornDate,
-        raca: race,
-        genero: gender,
-        nroEndereco: numero,
-        complementoEndereco: "",
-        cep,
-        idEndereco: responseEndereco.result.idEndereco,
-        idTime: 1,
-        //idTime: timeSelecionado,
-        idEspecialidade: especialidadeSelecionada,
-      }
+      nomeCompleto: name,
+      nomeSocial: "",
+      cpf: cpf,
+      dataNascimento: formattedBornDate,
+      raca: race,
+      genero: gender,
+      nroEndereco: numero,
+      complementoEndereco: "",
+      cep,
+      idEndereco: responseEndereco.result.idEndereco,
+      idTime: 1,
+      //idTime: timeSelecionado,
+      idEspecialidade: especialidadeSelecionada,
+    }
     );
     console.log("Alterou profissional");
     const responseListar = await fetchDados("profissional/listar", "GET");
@@ -434,14 +439,31 @@ const PageProfissional = () => {
                     />
                   </Grid>
                   <Grid item width={"3.5rem"}>
-                    <TextField
-                      fullWidth
-                      id="outlined-basic"
-                      label="UF"
-                      variant="outlined"
-                      value={unidadeFederativa}
-                      onChange={(e) => setUnidadeFederativa(e.target.value)}
-                    />
+                    <FormControl fullWidth>
+                      <InputLabel id="expertise-select-label">
+                        UF
+                      </InputLabel>
+                      <Select
+                        labelId="uf-select-label"
+                        id="uf-select"
+                        value={ufSelecionada}
+                        label="UF"
+                        onChange={(e) => {
+                          setUfSelecionada(e.target.value as unknown as Number);
+                        }}
+                        MenuProps={{
+                          PaperProps: { sx: { maxHeight: "8rem" } },
+                        }}
+                      >
+                        {Array.isArray(ufs) &&
+                          ufs.length > 0 &&
+                          ufs.map((uf: UnidadeFederativa) => (
+                            <MenuItem key={uf.siglaUnidadeFederativa} value={uf.idUnidadeFederativa}>
+                              {uf.siglaUnidadeFederativa}
+                            </MenuItem>
+                          ))}
+                      </Select>
+                    </FormControl>
                   </Grid>
                   <Grid item width={"21.2rem"}>
                     <TextField
@@ -478,6 +500,8 @@ const PageProfissional = () => {
                 setOpenFormDialog(true);
                 const responseEspecialidades = await fetchDados(`especialidade/listar`, "GET");
                 setEspecialidades(responseEspecialidades.result);
+                const responseUfs = await fetchDados(`endereco/listarUnidadesFederativas`, "GET");
+                setUfs(responseUfs.result);
               }}
             >
               <AddIcon />
