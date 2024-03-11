@@ -128,12 +128,9 @@ const PageProfissional = () => {
           cep,
           idEndereco: responseEndereco.result.idEndereco,
           idTime: 1,
-          idEspecialidade: 1,
+          idEspecialidade: especialidadeSelecionada,
         }
       );
-      if (!responseCadastro.ok) {
-        throw new Error("Erro ao cadastrar profissional");
-      }
       console.log("Cadastrou profissional");
     } catch (error) {
       console.error("Erro ao cadastrar profissional:", error);
@@ -178,13 +175,13 @@ const PageProfissional = () => {
   const handleClickAlterar = async (id: number) => {
     const formattedBornDate = bornDate ? dayjs(bornDate).format("YYYY-MM-DD") : "";
     setFormattedBornDate(formattedBornDate);
-    
+    console.log("entrou no alterar")
     const responseBairro = await fetchDados("endereco/inserirBairro", "POST", {bairro: bairro});
     const responseLogradouro = await fetchDados("endereco/inserirLogradouro", "POST", {logradouro: logradouro, idTipoLogradouro: 1});
     const responseUnidadeFederativa = await fetchDados(`endereco/buscarIdUnidadeFederativa/${unidadeFederativa}`, "GET");
     const responseCidade = await fetchDados("endereco/inserirCidade", "POST", {cidade: cidade, idUnidadeFederativa: 1});
     const responseEndereco = await fetchDados("endereco/inserirEndereco", "POST", {cep: cep, idBairro: responseBairro.result.idBairro, idLogradouro: responseLogradouro.result.idLogradouro, idCidade: responseCidade.result.idCidade});
-    const responseAlteracao = await fetchDados(`profissional/alterar${id}`, "PUT", {
+    const responseAlteracao = await fetchDados(`profissional/alterar/${id}`, "PUT", {
         nomeCompleto: name,
         nomeSocial: "",
         cpf: cpf,
@@ -196,7 +193,8 @@ const PageProfissional = () => {
         cep,
         idEndereco: responseEndereco.result.idEndereco,
         idTime: 1,
-        idEspecialidade: 1,
+        //idTime: timeSelecionado,
+        idEspecialidade: especialidadeSelecionada,
       }
     );
     console.log("Alterou profissional");
@@ -471,13 +469,15 @@ const PageProfissional = () => {
             <Fab
               color="secondary"
               aria-label="add"
-              onClick={(id) => {
+              onClick={async (id) => {
                 setName("");
                 setBornDate(null);
                 setRace("");
                 setGender("");
                 setConfirmationSaveId(null);
                 setOpenFormDialog(true);
+                const responseEspecialidades = await fetchDados(`especialidade/listar`, "GET");
+                setEspecialidades(responseEspecialidades.result);
               }}
             >
               <AddIcon />

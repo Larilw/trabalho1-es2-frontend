@@ -182,9 +182,7 @@ const PageProjeto = () => {
   };
 
   const handleClickAlterar = async (id: number) => {
-    const formattedBeginDate = beginDate
-      ? dayjs(beginDate).format("YYYY-MM-DD")
-      : "";
+    const formattedBeginDate = beginDate ? dayjs(beginDate).format("YYYY-MM-DD") : "";
     const formattedEndDate = endDate ? dayjs(endDate).format("YYYY-MM-DD") : "";
     setFormattedBeginDate(formattedBeginDate);
     setFormattedEndDate(formattedEndDate);
