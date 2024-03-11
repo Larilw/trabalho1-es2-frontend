@@ -173,7 +173,7 @@ const PageProfissional = () => {
       console.log("Cadastrou profissional");
       await fetchProfissionais();
     } catch (error) {
-      console.error("Erro ao cadastrar profissional:", error);
+      console.error("Erro ao cadastrar profissional ", error);
     } finally {
       await fetchProfissionais();
     }
