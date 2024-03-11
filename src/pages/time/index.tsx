@@ -105,21 +105,21 @@ const PageProjeto = () => {
         );
         const profissionais = responseProfissionais.result;
         setProfissionais(profissionais);
-        console.log(profissionais);
+
+        const profissionaisMarcados = profissionais.filter(
+          (profissional: Profissional) => profissional.idTime === id
+        );
+        console.log("MARCADOS: ", profissionaisMarcados);
+        profissionaisMarcados.forEach((profissional: Profissional) => {
+          setChecked((prevChecked) => [
+            ...prevChecked,
+            profissional.idProfissional,
+          ]);
+        });
       } catch (error) {
         console.error("Erro ao buscar time:", error);
       }
     };
-    const profissionaisMarcados = profissionais.filter(
-      (profissional: Profissional) => profissional.idTime === id
-    );
-    console.log("MARCADOS: ", profissionaisMarcados);
-    profissionaisMarcados.forEach((profissional) => {
-      setChecked((prevChecked) => [
-        ...prevChecked,
-        profissional.idProfissional,
-      ]);
-    });
 
     fetchData();
   };
