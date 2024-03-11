@@ -245,7 +245,7 @@ const PageProfissional = () => {
         complementoEndereco: "",
         cep,
         idEndereco: responseEndereco.result.idEndereco,
-        idTime: 1,
+        //idTime: 1,
         //idTime: timeSelecionado,
         idEspecialidade: especialidadeSelecionada,
       }
