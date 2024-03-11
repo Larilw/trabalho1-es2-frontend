@@ -41,7 +41,6 @@ export default function CustomList({
           .filter((items) => items.name.includes(searchValue))
           .map((value) => {
             const labelId = `list-label-${value.id}`;
-
             return (
               <ListItem
                 key={value.id}

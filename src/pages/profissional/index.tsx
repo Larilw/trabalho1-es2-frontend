@@ -130,7 +130,7 @@ const PageProfissional = () => {
         complementoEndereco: "",
         cep,
         idEndereco: responseEndereco.result.idEndereco,
-        idTime: 1,
+        idTime: null,
         idEspecialidade: especialidadeSelecionada,
       }
       );
@@ -250,7 +250,8 @@ const PageProfissional = () => {
             <Box
               padding={1}
               sx={{ backgroundColor: "background.paper", borderRadius: "1rem" }}
-            >
+            >{
+              profissionais !== undefined && 
               <CustomList
                 items={profissionais.map((profissional) => ({
                   name: profissional.nomeCompleto,
@@ -267,6 +268,7 @@ const PageProfissional = () => {
                 }}
                 searchValue={searchValue}
               ></CustomList>
+            }
               <ConfirmationDialog
                 dialogText="Confirme a exclusão do funcionário"
                 open={openConfirmationDialog}

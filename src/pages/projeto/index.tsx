@@ -137,7 +137,7 @@ const PageProjeto = () => {
     const formattedEndDate = endDate ? dayjs(endDate).format("YYYY-MM-DD") : "";
     setFormattedBeginDate(formattedBeginDate);
     setFormattedEndDate(formattedEndDate);
-
+/*
     console.log("LOG DO REGISTRO", {
       nomeProjeto: name,
       objetivo: description,
@@ -147,7 +147,7 @@ const PageProjeto = () => {
       idCliente: 1,
       idTime: timeSelecionado,
     });
-
+*/
     const responseCadastro = await fetchDados("projeto/inserir", "POST", {
       nomeProjeto: name,
       objetivo: description,
@@ -208,7 +208,7 @@ const PageProjeto = () => {
       dataInicio: formattedBeginDate,
       dataTermino: formattedEndDate,
       valor: price,
-      idCliente: 1,
+      idCliente: clienteSelecionado,
       idTime: timeSelecionado,
     });
     console.log("Alterou projeto");
@@ -330,10 +330,7 @@ const PageProjeto = () => {
                         {Array.isArray(clientes) &&
                           clientes.length > 0 &&
                           clientes.map((cliente: Cliente) => (
-                            <MenuItem
-                              key={cliente.idCliente}
-                              value={cliente.idCliente}
-                            >
+                            <MenuItem key={cliente.idCliente} value={cliente.idCliente}>
                               {cliente.nomeCompleto}
                             </MenuItem>
                           ))}
