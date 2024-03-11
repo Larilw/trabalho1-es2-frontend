@@ -49,7 +49,6 @@ const PageProfissional = () => {
   const [formattedBornDate, setFormattedBornDate] = useState("");
   const [gender, setGender] = useState("");
   const [race, setRace] = useState("");
-  const [expertise, setExpertise] = useState("");
   const [name, setName] = useState("");
   const [cpf, setCpf] = useState("");
   const [cep, setCep] = useState("");
@@ -154,7 +153,7 @@ const PageProfissional = () => {
         setBornDate(new Date(profissional.dataNascimento));
         setGender(profissional.genero);
         setRace(profissional.raca);
-        setExpertise(profissional.especialidade);
+        setEspecialidadeSelecionada(profissional.especialidade);
         setCpf(profissional.cpf);
         setNumero(profissional.nroEndereco);
 
@@ -168,7 +167,6 @@ const PageProfissional = () => {
         setUnidadeFederativa(endereco.unidadeFederativa);
 
         const responseEspecialidades = await fetchDados(`especialidade/listar`, "GET");
-        console.log(responseEspecialidades.result);
         setEspecialidades(responseEspecialidades.result);
       } catch (error) {
         console.error("Erro ao buscar profissional:", error);
@@ -372,7 +370,7 @@ const PageProfissional = () => {
                       <Select
                         labelId="expertise-select-label"
                         id="expertise-select"
-                        value={expertise}
+                        value={especialidadeSelecionada}
                         label="Especialidade"
                         onChange={(e) => {
                           setEspecialidadeSelecionada(e.target.value as unknown as Number);
@@ -385,7 +383,7 @@ const PageProfissional = () => {
                           especialidades.length > 0 &&
                           especialidades.map((especialidade: Especialidade) => (
                             <MenuItem key={especialidade.idEspecialidade} value={especialidade.idEspecialidade}>
-                              {especialidade.especialidade}
+                              {especialidade.tipoEspecialidade}
                             </MenuItem>
                           ))}
                       </Select>
@@ -476,7 +474,6 @@ const PageProfissional = () => {
               onClick={(id) => {
                 setName("");
                 setBornDate(null);
-                setExpertise("");
                 setRace("");
                 setGender("");
                 setConfirmationSaveId(null);
