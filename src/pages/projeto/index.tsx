@@ -71,7 +71,6 @@ const PageProjeto = () => {
   const [formattedBeginDate, setFormattedBeginDate] = useState("");
   const [formattedEndDate, setFormattedEndDate] = useState("");
   const [name, setName] = useState("");
-  const [client, setClient] = useState("");
   const [description, setDescription] = useState("");
   const [price, setPrice] = useState("");
   const [projetos, setProjetos] = useState<Projeto[]>([]);
@@ -137,17 +136,17 @@ const PageProjeto = () => {
     const formattedEndDate = endDate ? dayjs(endDate).format("YYYY-MM-DD") : "";
     setFormattedBeginDate(formattedBeginDate);
     setFormattedEndDate(formattedEndDate);
-/*
+
     console.log("LOG DO REGISTRO", {
       nomeProjeto: name,
       objetivo: description,
       dataInicio: formattedBeginDate,
       dataTermino: formattedEndDate,
       valor: price,
-      idCliente: 1,
+      idCliente: clienteSelecionado,
       idTime: timeSelecionado,
     });
-*/
+
     const responseCadastro = await fetchDados("projeto/inserir", "POST", {
       nomeProjeto: name,
       objetivo: description,
@@ -181,14 +180,14 @@ const PageProjeto = () => {
         });
 */
         setName(projeto.nomeProjeto);
-        setClient(projeto.cliente);
         setDescription(projeto.objetivo);
         setFormattedBeginDate(projeto.dataInicio);
         setFormattedEndDate(projeto.dataTermino);
         setBeginDate(new Date(projeto.dataInicio));
         setEndDate(new Date(projeto.dataTermino));
         setPrice(projeto.valor);
-        setTimeSelecionado(projeto.time);
+        setClienteSelecionado(projeto.idCliente);
+        setTimeSelecionado(projeto.idTime);
       } catch (error) {
         console.error("Erro ao buscar projeto:", error);
       }
@@ -419,7 +418,6 @@ const PageProjeto = () => {
                 setName("");
                 setBeginDate(null);
                 setEndDate(null);
-                setClient("");
                 setPrice("");
                 setDescription("");
                 setConfirmationSaveId(null);
