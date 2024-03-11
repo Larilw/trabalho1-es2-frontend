@@ -59,12 +59,8 @@ function PriceInput({ price, setPrice }: PriceInputProps) {
 const PageProjeto = () => {
   const [searchValue, setSearchValue] = useState("");
   const [openConfirmationDialog, setOpenConfirmationDialog] = useState(false);
-  const [confirmationDeleteId, setConfirmationDeleteId] = useState<
-    number | null
-  >(null);
-  const [confirmationSaveId, setConfirmationSaveId] = useState<number | null>(
-    null
-  );
+  const [confirmationDeleteId, setConfirmationDeleteId] = useState<number | null>(null);
+  const [confirmationSaveId, setConfirmationSaveId] = useState<number | null>(null);
   const [openFormDialog, setOpenFormDialog] = useState(false);
   const [beginDate, setBeginDate] = useState<Date | null>(dayjs().toDate());
   const [endDate, setEndDate] = useState<Date | null>(dayjs().toDate());
@@ -99,7 +95,7 @@ const PageProjeto = () => {
 
     setChecked(newChecked);
   };
-  /* Lista do modal*/
+  /*Lista do modal*/
 
   useEffect(() => {
     const fetchData = async () => {
@@ -126,17 +122,17 @@ const PageProjeto = () => {
       ? dayjs(beginDate).format("YYYY-MM-DD")
       : "";
     const formattedEndDate = endDate ? dayjs(endDate).format("YYYY-MM-DD") : "";
-
     setFormattedBeginDate(formattedBeginDate);
     setFormattedEndDate(formattedEndDate);
+    
     console.log("LOG DO REGISTRO", {
       nomeProjeto: name,
       objetivo: description,
       dataInicio: formattedBeginDate,
       dataTermino: formattedEndDate,
       valor: price,
-      Cliente_idCliente: 1,
-      Time_idTime: timeSelecionado,
+      idCliente: 1,
+      idTime: timeSelecionado,
     });
 
     const responseCadastro = await fetchDados("projeto/inserir", "POST", {
@@ -145,40 +141,41 @@ const PageProjeto = () => {
       dataInicio: formattedBeginDate,
       dataTermino: formattedEndDate,
       valor: price,
-      Cliente_idCliente: 10,
-      Time_idTime: timeSelecionado,
+      idCliente: 1,
+      idTime: timeSelecionado,
     });
-    console.log("RESPONSE", responseCadastro);
+    console.log("Cadastrou projeto");
+    const responseListar = await fetchDados("projeto/listar", "GET");
+    setProjetos(responseListar.result);
   };
 
-  const handleClickBuscarProjeto = async (id: number) => {
+  const handleClickBuscar = async (id: number) => {
     const fetchData = async () => {
       try {
-        const responseProjetos = await fetchDados(
-          `projeto/buscar/${id}`,
-          "GET"
-        );
-        const projeto = responseProjetos.result;
+        const responseBusca = await fetchDados(`projeto/buscar/${id}`, "GET");
+        const projeto = responseBusca.result;
 
         console.log({
           name: projeto.nomeProjeto,
+          client: projeto.cliente,
           description: projeto.objetivo,
           formattedBeginDate: projeto.dataInicio,
           formattedEndDate: projeto.dataTermino,
           beginDate: new Date(projeto.dataInicio),
           endDate: new Date(projeto.dataTermino),
           price: projeto.valor,
-          timeSelecionado: projeto.Time_idTime,
+          timeSelecionado: projeto.time,
         });
 
         setName(projeto.nomeProjeto);
+        setClient(projeto.cliente);
         setDescription(projeto.objetivo);
         setFormattedBeginDate(projeto.dataInicio);
         setFormattedEndDate(projeto.dataTermino);
         setBeginDate(new Date(projeto.dataInicio));
         setEndDate(new Date(projeto.dataTermino));
         setPrice(projeto.valor);
-        setTimeSelecionado(projeto.Time_idTime);
+        setTimeSelecionado(projeto.time);
       } catch (error) {
         console.error("Erro ao buscar projeto:", error);
       }
@@ -187,17 +184,34 @@ const PageProjeto = () => {
     fetchData();
   };
 
-  const handleClickExcluir = async () => {
-    const responseCadastro = await fetchDados(
-      `projeto/excluir/${confirmationDeleteId}`,
-      "PUT"
-    );
-    console.log("Excluiu projeto");
-    const responseProjetos = await fetchDados("projeto/listar", "GET");
-    setProjetos(responseProjetos.result);
+  const handleClickAlterar = async (id: number) => {
+    const formattedBeginDate = beginDate
+      ? dayjs(beginDate).format("YYYY-MM-DD")
+      : "";
+    const formattedEndDate = endDate ? dayjs(endDate).format("YYYY-MM-DD") : "";
+    setFormattedBeginDate(formattedBeginDate);
+    setFormattedEndDate(formattedEndDate);
+
+    const responseAlteracao = await fetchDados(`projeto/alterar/${id}`, "PUT", {
+      nomeProjeto: name,
+      objetivo: description,
+      dataInicio: formattedBeginDate,
+      dataTermino: formattedEndDate,
+      valor: price,
+      idCliente: 1,
+      idTime: timeSelecionado,
+    });
+    console.log("Alterou projeto");
+    const responseListar = await fetchDados("projeto/listar", "GET");
+    setProjetos(responseListar.result);
   };
 
-  const handleClickAlterar = async (id: number) => {};
+  const handleClickExcluir = async (id: number) => {
+    const responseExclusao = await fetchDados(`projeto/excluir/${id}`, "PUT");
+    console.log("Excluiu projeto");
+    const responseListar = await fetchDados("projeto/listar", "GET");
+    setProjetos(responseListar.result);
+  };
 
   return (
     <>
@@ -243,7 +257,7 @@ const PageProjeto = () => {
                 }))}
                 onClick={(id) => {
                   setConfirmationSaveId(id);
-                  handleClickBuscarProjeto(id);
+                  handleClickBuscar(id);
                   setOpenFormDialog(true);
                 }}
                 onDelete={(id) => {
@@ -258,7 +272,7 @@ const PageProjeto = () => {
                 setOpen={setOpenConfirmationDialog}
                 setConfirmation={(confirmed) => {
                   if (confirmed && confirmationDeleteId !== null) {
-                    handleClickExcluir();
+                    handleClickExcluir(confirmationDeleteId);
                   }
                   setConfirmationDeleteId(null);
                 }}
@@ -269,11 +283,6 @@ const PageProjeto = () => {
                 setOpen={setOpenFormDialog}
                 setConfirmation={(confirmed) => {
                   if (confirmed && confirmationSaveId !== null) {
-                    console.log(
-                      "Salvar informações do id:",
-                      confirmationSaveId
-                    );
-                    console.log("INFO: ", name, beginDate, endDate);
                     handleClickAlterar(confirmationSaveId);
                   } else if (confirmed && confirmationSaveId === null) {
                     handleClickCadastrar();
@@ -328,6 +337,7 @@ const PageProjeto = () => {
                       <LocalizationProvider dateAdapter={AdapterDayjs}>
                         <DatePicker
                           label="Data de Início"
+                          defaultValue={dayjs(beginDate)}
                           format="DD/MM/YYYY"
                           onChange={(newDate: Dayjs | null) =>
                             setBeginDate(newDate?.toDate() ?? null)
@@ -339,6 +349,7 @@ const PageProjeto = () => {
                       <LocalizationProvider dateAdapter={AdapterDayjs}>
                         <DatePicker
                           label="Data de Término"
+                          defaultValue={dayjs(endDate)}
                           format="DD/MM/YYYY"
                           onChange={(newDate: Dayjs | null) =>
                             setEndDate(newDate?.toDate() ?? null)
