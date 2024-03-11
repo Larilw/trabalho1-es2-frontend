@@ -43,44 +43,27 @@ const PageProfissional = () => {
     null
   );
   const [openFormDialog, setOpenFormDialog] = useState(false);
+  const [bornDate, setBornDate] = useState<Date | null>(dayjs().toDate());
+  const [formattedBornDate, setFormattedBornDate] = useState("");
   const [gender, setGender] = useState("");
   const [race, setRace] = useState("");
   const [date, setDate] = useState<Date | null>(null);
   const [expertise, setExpertise] = useState("");
   const [name, setName] = useState("");
   const [cpf, setCpf] = useState("");
-  const [bairro, setBairro] = useState("");
-  const [numero, setNumero] = useState("");
-  const [cidade, setCidade] = useState("");
-  const [logradouro, setLogradouro] = useState("");
-  const [unidadeFederativa, setUnidadeFederativa] = useState("");
   const [cep, setCep] = useState("");
   const [cepNumerico, setCepNumerico] = useState<number | null>(null);
+  const [numero, setNumero] = useState("");
+  const [logradouro, setLogradouro] = useState("");
+  const [bairro, setBairro] = useState("");
+  const [cidade, setCidade] = useState("");
+  const [unidadeFederativa, setUnidadeFederativa] = useState("");
   const [profissionais, setProfissionais] = useState<Profissional[]>([]);
 
   dayjs.extend(customParseFormat);
   const formatoData = "DD/MM/YYYY";
   const dayjsComFormato = dayjs().format(formatoData);
   const adapter = new AdapterDayjs({ locale: dayjsComFormato });
-
-  const items = [
-    { name: "lari", id: 1 },
-    { name: "vic", id: 2 },
-    { name: "x", id: 3 },
-    { name: "x", id: 4 },
-    { name: "x", id: 5 },
-    { name: "x", id: 6 },
-    { name: "x", id: 7 },
-    { name: "x", id: 8 },
-    { name: "x", id: 9 },
-    { name: "x", id: 10 },
-    { name: "x", id: 11 },
-    { name: "x", id: 12 },
-    { name: "x", id: 13 },
-    { name: "x", id: 14 },
-    { name: "x", id: 15 },
-    { name: "x", id: 16 },
-  ];
 
   const buscarEndereco = async (cep: Number) => {
     console.log("viacep");
@@ -122,56 +105,74 @@ const PageProfissional = () => {
   }, []);
 
   const handleClickCadastrar = async () => {
-    console.log("TENTOU CADASTRAR");
+    const formattedBornDate = bornDate ? dayjs(bornDate).format("YYYY-MM-DD") : "";
+    setFormattedBornDate(formattedBornDate);
+
     try {
-      const responseCadastro = await fetchDados(
-        "profissional/inserir",
-        "POST",
-        {
+      const responseBairro = await fetchDados("endereco/inserirBairro", "POST", {bairro: bairro});
+      const responseLogradouro = await fetchDados("endereco/inserirLogradouro", "POST", {logradouro: logradouro, idTipoLogradouro: 1});
+      const responseUnidadeFederativa = await fetchDados(`endereco/buscarIdUnidadeFederativa/${unidadeFederativa}`, "GET");
+      const responseCidade = await fetchDados("endereco/inserirCidade", "POST", {cidade: cidade, idUnidadeFederativa: 1});
+      const responseEndereco = await fetchDados("endereco/inserirEndereco", "POST", {cep: cep, idBairro: responseBairro.result.idBairro, idLogradouro: responseLogradouro.result.idLogradouro, idCidade: responseCidade.result.idCidade});
+      console.log(responseEndereco);
+      const responseCadastro = await fetchDados("profissional/inserir", "POST", {
           nomeCompleto: name,
           nomeSocial: "",
-          cpf,
-          dataNascimento: date?.toISOString().split("T")[0] || "",
+          cpf: cpf,
+          dataNascimento: formattedBornDate,
           raca: race,
           genero: gender,
           nroEndereco: numero,
           complementoEndereco: "",
           cep,
-          especialidade: expertise,
-          time: { idTime: 1, nomeTime: "" },
-          endereco: {
-            idEndereco: 1,
-            logradouro,
-            bairro,
-            cidade,
-            unidadeFederativa,
-          },
+          idEndereco: responseEndereco.result.idEndereco,
+          idTime: 1,
+          idEspecialidade: 1,
         }
       );
-
       console.log(responseCadastro);
       if (!responseCadastro.ok) {
         throw new Error("Erro ao cadastrar profissional");
       }
-
       console.log("Cadastrou profissional");
     } catch (error) {
       console.error("Erro ao cadastrar profissional:", error);
     }
+    const responseListar = await fetchDados("projeto/listar", "GET");
+    setProfissionais(responseListar.result);
+  };
+
+  const handleClickBuscar = async (id: number) => {
+    try {
+      const responseBusca = await fetchDados(`profissional/buscar/${id}`, "GET");
+      if (!responseBusca.ok) {
+        throw new Error("Erro ao buscar profissional");
+      }
+      /*
+      setName(responseBusca.nomeCompleto);
+      setDate(null);
+      setGender(responseBusca.genero);
+      setRace(responseBusca.raca);
+      setExpertise("");
+      setCpf(responseBusca.cpf);
+      setNumero(responseBusca.nroEndereco);
+      */
+      //setBairro(responseBusca.bairro);
+      //setCidade(responseBusca.cidade);
+      //setLogradouro(responseBusca.logradouro);
+      //setUnidadeFederativa(responseBusca.unidadeFederativa);
+      //setCep(responseBusca.cep);
+      //setCepNumerico(null);
+    } catch (error) {
+      console.error("Erro ao buscar profissional:", error);
+    }
   };
 
   const handleClickExcluir = async (id: number) => {
-    try {
-      const responseExclusao = await fetchDados(`projeto/excluir/${id}`, "PUT");
-
-      if (!responseExclusao.ok) {
-        throw new Error("Erro ao excluir projeto");
-      }
-
-      console.log("Excluiu projeto com ID:", id);
-    } catch (error) {
-      console.error("Erro ao excluir projeto:", error);
-    }
+    const responseExclusao = await fetchDados(`profissional/excluir/${id}`, "PUT");
+    console.log("Excluiu projeto");
+    const responseListar = await fetchDados("profissional/listar", "GET");
+    setProfissionais(responseListar.result);
   };
 
   return (
@@ -218,6 +219,7 @@ const PageProfissional = () => {
                 }))}
                 onClick={(id) => {
                   setConfirmationSaveId(id);
+                  handleClickBuscar(id);
                   setOpenFormDialog(true);
                 }}
                 onDelete={(id) => {
@@ -319,9 +321,9 @@ const PageProfissional = () => {
                         label="Gênero"
                         onChange={(e) => setGender(e.target.value)}
                       >
-                        <MenuItem value={"fem"}>Feminino</MenuItem>
-                        <MenuItem value={"mas"}>Masculino</MenuItem>
-                        <MenuItem value={"nonbi"}>Não binário</MenuItem>
+                        <MenuItem value={"Feminino"}>Feminino</MenuItem>
+                        <MenuItem value={"Masculino"}>Masculino</MenuItem>
+                        <MenuItem value={"Não binário"}>Não binário</MenuItem>
                       </Select>
                     </FormControl>
                   </Grid>
@@ -335,8 +337,11 @@ const PageProfissional = () => {
                         label="Raça"
                         onChange={(e) => setRace(e.target.value)}
                       >
-                        <MenuItem value={"white"}>Branco</MenuItem>
-                        <MenuItem value={"yellow"}>Amarelo</MenuItem>
+                        <MenuItem value={"Preto"}>Preto</MenuItem>
+                        <MenuItem value={"Pardo"}>Pardo</MenuItem>
+                        <MenuItem value={"Branco"}>Branco</MenuItem>
+                        <MenuItem value={"Indígen"}>Indígena</MenuItem>
+                        <MenuItem value={"Amarelo"}>Amarelo</MenuItem>
                       </Select>
                     </FormControl>
                   </Grid>
