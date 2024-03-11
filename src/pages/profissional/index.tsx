@@ -158,8 +158,9 @@ const PageProfissional = () => {
         setCpf(profissional.cpf);
         setNumero(profissional.nroEndereco);
 
-        const responseEndereco = await fetchDados(`buscarEnderecoCompleto/${profissional.idEndereco}`, "GET");
+        const responseEndereco = await fetchDados(`endereco/buscarEnderecoCompleto/${profissional.idEndereco}`, "GET");
         const endereco = responseEndereco.result;
+        setCep(endereco.cep);
         setCepNumerico(endereco.cep);
         setLogradouro(endereco.logradouro);
         setBairro(endereco.bairro);
@@ -167,6 +168,7 @@ const PageProfissional = () => {
         setUnidadeFederativa(endereco.unidadeFederativa);
 
         const responseEspecialidades = await fetchDados(`especialidade/listar`, "GET");
+        console.log(responseEspecialidades.result);
         setEspecialidades(responseEspecialidades.result);
       } catch (error) {
         console.error("Erro ao buscar profissional:", error);
