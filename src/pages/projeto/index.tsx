@@ -66,28 +66,23 @@ const PageProjeto = () => {
     null
   );
   const [openFormDialog, setOpenFormDialog] = useState(false);
-  const [gender, setGender] = useState("");
-  const [race, setRace] = useState("");
-  const [beginDate, setBeginDate] = useState<Date | null>(null);
-  const [endDate, setEndDate] = useState<Date | null>(null);
-  const [expertise, setExpertise] = useState("");
+  const [beginDate, setBeginDate] = useState<Date | null>(dayjs().toDate());
+  const [endDate, setEndDate] = useState<Date | null>(dayjs().toDate());
+  const [formattedBeginDate, setFormattedBeginDate] = useState("");
+  const [formattedEndDate, setFormattedEndDate] = useState("");
   const [name, setName] = useState("");
   const [client, setClient] = useState("");
   const [description, setDescription] = useState("");
   const [price, setPrice] = useState("");
   const [projetos, setProjetos] = useState<Projeto[]>([]);
   const [clientes, setClientes] = useState([]);
-  const [times, setTimes] = useState([]);
-  const [timeSelecionado, setTimeSelecionado] = React.useState("");
+  const [times, setTimes] = useState<Time[]>([]);
+  const [timeSelecionado, setTimeSelecionado] = React.useState<Number>();
 
   dayjs.extend(customParseFormat);
   const formatoData = "DD/MM/YYYY";
   const dayjsComFormato = dayjs().format(formatoData);
   const adapter = new AdapterDayjs({ locale: dayjsComFormato });
-
-  const handleNameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setName(event.target.value);
-  };
 
   /*Lista do modal*/
   const [checked, setChecked] = React.useState([1]);
@@ -117,8 +112,8 @@ const PageProjeto = () => {
 
       try {
         // Pega a listagem de times para fornecer durante o cadastro
-        const responseTimes = await fetchDados("time/listar/", "GET");
-        setTimes(responseTimes);
+        const responseTimes = await fetchDados("time/listar", "GET");
+        setTimes(responseTimes.result);
       } catch (error) {
         console.error("Erro ao listar times:", error);
       }
@@ -127,26 +122,82 @@ const PageProjeto = () => {
   }, []);
 
   const handleClickCadastrar = async () => {
-    const responseCadastro = await fetchDados("projeto/inserir", "POST", {
-      nomeProjeto: "Teste consumo",
-      objetivo: "Conseguir consumir",
-      dataInicio: "2000-02-01",
-      dataTermino: "2000-02-09",
-      valor: 1000,
+    const formattedBeginDate = beginDate
+      ? dayjs(beginDate).format("YYYY-MM-DD")
+      : "";
+    const formattedEndDate = endDate ? dayjs(endDate).format("YYYY-MM-DD") : "";
+
+    setFormattedBeginDate(formattedBeginDate);
+    setFormattedEndDate(formattedEndDate);
+    console.log("LOG DO REGISTRO", {
+      nomeProjeto: name,
+      objetivo: description,
+      dataInicio: formattedBeginDate,
+      dataTermino: formattedEndDate,
+      valor: price,
       Cliente_idCliente: 1,
-      Time_idTime: 1,
+      Time_idTime: timeSelecionado,
     });
-    console.log("Cadastrou projeto");
+
+    const responseCadastro = await fetchDados("projeto/inserir", "POST", {
+      nomeProjeto: name,
+      objetivo: description,
+      dataInicio: formattedBeginDate,
+      dataTermino: formattedEndDate,
+      valor: price,
+      Cliente_idCliente: 10,
+      Time_idTime: timeSelecionado,
+    });
+    console.log("RESPONSE", responseCadastro);
+  };
+
+  const handleClickBuscarProjeto = async (id: number) => {
+    const fetchData = async () => {
+      try {
+        const responseProjetos = await fetchDados(
+          `projeto/buscar/${id}`,
+          "GET"
+        );
+        const projeto = responseProjetos.result;
+
+        console.log({
+          name: projeto.nomeProjeto,
+          description: projeto.objetivo,
+          formattedBeginDate: projeto.dataInicio,
+          formattedEndDate: projeto.dataTermino,
+          beginDate: new Date(projeto.dataInicio),
+          endDate: new Date(projeto.dataTermino),
+          price: projeto.valor,
+          timeSelecionado: projeto.Time_idTime,
+        });
+
+        setName(projeto.nomeProjeto);
+        setDescription(projeto.objetivo);
+        setFormattedBeginDate(projeto.dataInicio);
+        setFormattedEndDate(projeto.dataTermino);
+        setBeginDate(new Date(projeto.dataInicio));
+        setEndDate(new Date(projeto.dataTermino));
+        setPrice(projeto.valor);
+        setTimeSelecionado(projeto.Time_idTime);
+      } catch (error) {
+        console.error("Erro ao buscar projeto:", error);
+      }
+    };
+
+    fetchData();
   };
 
   const handleClickExcluir = async () => {
-    const responseCadastro = await fetchDados("projeto/excluir/${confirmationDeleteId}", "PUT");
-    console.log("Exlcuiu projeto");
+    const responseCadastro = await fetchDados(
+      `projeto/excluir/${confirmationDeleteId}`,
+      "PUT"
+    );
+    console.log("Excluiu projeto");
+    const responseProjetos = await fetchDados("projeto/listar", "GET");
+    setProjetos(responseProjetos.result);
   };
 
-  const handleChangeTime = (event: { target: { value: React.SetStateAction<string>; }; }) => {
-    setTimeSelecionado(event.target.value);
-  };
+  const handleClickAlterar = async (id: number) => {};
 
   return (
     <>
@@ -157,7 +208,7 @@ const PageProjeto = () => {
           sx={{ backgroundColor: "#fff" }}
           width={"50rem"}
           borderRadius={"2rem"}
-          gap={2}
+          gap={1}
         >
           <Grid item xs={12}>
             <SearchBar
@@ -173,6 +224,7 @@ const PageProjeto = () => {
               backgroundColor: "#edf2fb",
               padding: "1rem",
               borderRadius: "1rem",
+              minHeight: "28rem",
               boxShadow: "0px 1px 1px 0px rgba(0,0,0,0.20)",
             }}
             xs={12}
@@ -191,6 +243,7 @@ const PageProjeto = () => {
                 }))}
                 onClick={(id) => {
                   setConfirmationSaveId(id);
+                  handleClickBuscarProjeto(id);
                   setOpenFormDialog(true);
                 }}
                 onDelete={(id) => {
@@ -206,7 +259,6 @@ const PageProjeto = () => {
                 setConfirmation={(confirmed) => {
                   if (confirmed && confirmationDeleteId !== null) {
                     handleClickExcluir();
-                    console.log("Excluir item com ID:", confirmationDeleteId);
                   }
                   setConfirmationDeleteId(null);
                 }}
@@ -221,17 +273,10 @@ const PageProjeto = () => {
                       "Salvar informações do id:",
                       confirmationSaveId
                     );
-                    console.log(
-                      "INFO: ",
-                      name,
-                      beginDate,
-                      endDate,
-                      gender,
-                      race,
-                      expertise
-                    );
+                    console.log("INFO: ", name, beginDate, endDate);
+                    handleClickAlterar(confirmationSaveId);
                   } else if (confirmed && confirmationSaveId === null) {
-                    console.log("Criar usuário com as informações");
+                    handleClickCadastrar();
                   }
                   setConfirmationSaveId(null);
                 }}
@@ -246,7 +291,8 @@ const PageProjeto = () => {
                       id="outlined-basic"
                       label="Nome do Projeto"
                       variant="outlined"
-                      onChange={handleNameChange}
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
                     />
                   </Grid>
                   <Grid item xs={12}>
@@ -255,7 +301,8 @@ const PageProjeto = () => {
                       id="outlined-basic"
                       label="Nome do Cliente"
                       variant="outlined"
-                      onChange={handleNameChange}
+                      value={client}
+                      onChange={(e) => setClient(e.target.value)}
                     />
                   </Grid>
                   <Grid item width={"19.5rem"}>
@@ -266,7 +313,8 @@ const PageProjeto = () => {
                       variant="outlined"
                       multiline
                       rows={4.1}
-                      onChange={handleNameChange}
+                      value={description}
+                      onChange={(e) => setDescription(e.target.value)}
                     />
                   </Grid>
                   <Grid
@@ -281,9 +329,8 @@ const PageProjeto = () => {
                         <DatePicker
                           label="Data de Início"
                           format="DD/MM/YYYY"
-                          value={dayjs()}
                           onChange={(newDate: Dayjs | null) =>
-                            setBeginDate(dayjs(newDate).toDate())
+                            setBeginDate(newDate?.toDate() ?? null)
                           }
                         />
                       </LocalizationProvider>
@@ -293,9 +340,8 @@ const PageProjeto = () => {
                         <DatePicker
                           label="Data de Término"
                           format="DD/MM/YYYY"
-                          defaultValue={dayjs()}
                           onChange={(newDate: Dayjs | null) =>
-                            setEndDate(dayjs(newDate).toDate())
+                            setEndDate(newDate?.toDate() ?? null)
                           }
                         />
                       </LocalizationProvider>
@@ -309,14 +355,23 @@ const PageProjeto = () => {
                       <InputLabel id="team-select-label">
                         Time Responsável
                       </InputLabel>
-                      <Select label="Time Responsável" value={timeSelecionado} onChange={handleChangeTime}>
-                       {/*times &&
-                         times.map((time: Time) => {
-                           return (
-                             <MenuItem value={time.idTime}>{time.nomeTime}</MenuItem>
-                           );
-                         })
-                         */}
+                      <Select
+                        label="Time Responsável"
+                        value={timeSelecionado}
+                        onChange={(e) => {
+                          setTimeSelecionado(e.target.value as Number);
+                        }}
+                        MenuProps={{
+                          PaperProps: { sx: { maxHeight: "8rem" } },
+                        }}
+                      >
+                        {Array.isArray(times) &&
+                          times.length > 0 &&
+                          times.map((time: Time) => (
+                            <MenuItem key={time.idTime} value={time.idTime}>
+                              {time.nomeTime}
+                            </MenuItem>
+                          ))}
                       </Select>
                     </FormControl>
                   </Grid>
@@ -327,13 +382,12 @@ const PageProjeto = () => {
               color="secondary"
               aria-label="add"
               onClick={(id) => {
-                handleClickCadastrar();
                 setName("");
                 setBeginDate(null);
                 setEndDate(null);
-                setExpertise("");
-                setRace("");
-                setGender("");
+                setClient("");
+                setPrice("");
+                setDescription("");
                 setConfirmationSaveId(null);
                 setOpenFormDialog(true);
               }}
