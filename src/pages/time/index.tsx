@@ -14,7 +14,7 @@ import {
 import SearchBar from "@/components/SearchBar";
 import AddIcon from "@mui/icons-material/Add";
 import CustomList from "@/components/List";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import ConfirmationDialog from "@/components/ConfirmationDialog";
 import FormDialog from "@/components/FormDialog";
@@ -30,6 +30,8 @@ import ListItemAvatar from "@mui/material/ListItemAvatar";
 import Checkbox from "@mui/material/Checkbox";
 import Avatar from "@mui/material/Avatar";
 import React from "react";
+import { Time } from "@/models/Time";
+import { fetchDados } from "@/fetch";
 
 const PageProjeto = () => {
   const [searchValue, setSearchValue] = useState("");
@@ -42,6 +44,7 @@ const PageProjeto = () => {
   );
   const [openFormDialog, setOpenFormDialog] = useState(false);
   const [name, setName] = useState("");
+  const [times, setTimes] = useState<Time[]>([]);
 
   const handleNameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setName(event.target.value);
@@ -62,15 +65,59 @@ const PageProjeto = () => {
 
     setChecked(newChecked);
   };
-
   /* Lista do modal*/
 
-  const items = [
+  // Membros do time
+  const equipeTime = [
     { name: "lari", id: 20, expertise: "fullstack" },
     { name: "vic", id: 2, expertise: "frontend" },
   ];
 
-  
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const responseTimes = await fetchDados("time/listar", "GET");
+        setTimes(responseTimes.result);
+      } catch (error) {
+        console.error("Erro ao listar times:", error);
+      }
+    };
+    fetchData();
+  }, []);
+
+  const handleClickCadastrar = async () => {
+    const responseCadastro = await fetchDados("time/inserir", "POST", {nomeTime: name});
+    console.log("Cadastrou time");
+    const responseListar = await fetchDados("time/listar", "GET");
+    setTimes(responseListar.result);
+  };
+
+  const handleClickBuscar = async (id: number) => {
+    const fetchData = async () => {
+      try {
+        const responseProjetos = await fetchDados(`time/buscar/${id}`, "GET");
+        const time = responseProjetos.result;
+        setName(time.nomeTime);
+      } catch (error) {
+        console.error("Erro ao buscar time:", error);
+      }
+    };
+    fetchData();
+  };
+
+  const handleClickAlterar = async (id: number) => {
+    const responseAlteracao = await fetchDados(`time/alterar/${id}`, "PUT", {nomeTime: name});
+    console.log("Alterou time");
+    const responseListar = await fetchDados("time/listar", "GET");
+    setTimes(responseListar.result);
+  };
+
+  const handleClickExcluir = async (id: number) => {
+    const responseExclusao = await fetchDados(`time/excluir/${id}`, "PUT");
+    console.log("Excluiu time");
+    const responseListar = await fetchDados("time/listar", "GET");
+    setTimes(responseListar.result);
+  };
 
   return (
     <>
@@ -110,9 +157,13 @@ const PageProjeto = () => {
               sx={{ backgroundColor: "background.paper", borderRadius: "1rem" }}
             >
               <CustomList
-                items={items}
+                items={times.map((time) => ({
+                  name: time.nomeTime,
+                  id: time.idTime,
+                }))}
                 onClick={(id) => {
                   setConfirmationSaveId(id);
+                  handleClickBuscar(id);
                   setOpenFormDialog(true);
                 }}
                 onDelete={(id) => {
@@ -127,7 +178,7 @@ const PageProjeto = () => {
                 setOpen={setOpenConfirmationDialog}
                 setConfirmation={(confirmed) => {
                   if (confirmed && confirmationDeleteId !== null) {
-                    console.log("Excluir item com ID:", confirmationDeleteId);
+                    handleClickExcluir(confirmationDeleteId);
                   }
                   setConfirmationDeleteId(null);
                 }}
@@ -138,13 +189,9 @@ const PageProjeto = () => {
                 setOpen={setOpenFormDialog}
                 setConfirmation={(confirmed) => {
                   if (confirmed && confirmationSaveId !== null) {
-                    console.log(
-                      "Salvar informações do id:",
-                      confirmationSaveId
-                    );
-                    console.log("INFO: ", name, checked);
+                    handleClickAlterar(confirmationSaveId);
                   } else if (confirmed && confirmationSaveId === null) {
-                    console.log("Criar time com as informações");
+                    handleClickCadastrar();
                   }
                   setConfirmationSaveId(null);
                 }}
@@ -161,7 +208,8 @@ const PageProjeto = () => {
                     id="outlined-basic"
                     label="Nome do Time"
                     variant="outlined"
-                    onChange={handleNameChange}
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
                   />
                   <Box
                     sx={{
@@ -186,7 +234,7 @@ const PageProjeto = () => {
                           bgcolor: "#edf2fb",
                         }}
                       >
-                        {items.map((value) => {
+                        {equipeTime.map((value) => {
                           const labelId = `checkbox-list-secondary-label-${value}`;
                           return (
                             <ListItem
@@ -208,7 +256,7 @@ const PageProjeto = () => {
                                 <ListItemAvatar>
                                   <Avatar
                                     alt={`Avatar`}
-                                    // src={`/static/images/avatar/${value + 1}.jpg`}
+                                  // src={`/static/images/avatar/${value + 1}.jpg`}
                                   />
                                 </ListItemAvatar>
                                 <ListItemText
