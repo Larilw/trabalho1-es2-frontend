@@ -1,36 +1,94 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# Frontend - Sistema de Gerenciamento de Projetos
 
-## Getting Started
+## Trabalho 1 - Engenharia de Software 2
 
-First, run the development server:
+Implementação do frontend do 1º trabalho da disciplina de Engenharia de Software II sobre Scrum.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+## Índice
+
+1. [Descrição](#descrição)
+2. [Tecnologias Utilizadas](#tecnologias)
+3. [Instalação](#instalação)
+   1. [Instalação do Frontend - Para desenvolvimento](#instalação-do-frontend)
+   2. [Instalação da Api - Para desenvolvimento](#instalação-da-api)
+4. [Execução](#execução)
+   1. [Execução da Api - Para desenvolvimento](#execução-da-api)
+   2. [Execução do Frontend - Para desenvolvimento](#execução-do-frontend)
+5. [Estrutura do Projeto](#estrutura-do-projeto)
+   1. [Diretórios](#estrutura-de-diretórios)
+   2. [Descrição](#descrição-dos-diretórios)
+
+---
+
+## Descrição
+
+O projeto consiste numa aplicação de Cadastros de Projetos utilizando o framework SCRUM. Essa é a implementação do frontend da aplicação. A aplicação encontra-se hospedada em: []() para acesso público.
+
+---
+
+## Tecnologias
+
+- [Next.js](https://nextjs.org/): Framework React para desenvolvimento da aplicação.
+- [Material-UI](https://mui.com/material-ui/): Biblioteca de componentes React.
+- [Docker](https://www.docker.com/): Plataforma para desenvolvimento, envio e execução de aplicativos em contêineres.
+- [Docker Compose](https://docs.docker.com/compose/): Ferramenta para definir e executar aplicativos Docker de vários contêineres.
+
+## Instalação
+
+- Versão do Node: 20.11.1
+
+### Instalação do frontend para desenvolvimento (repositório privado)
+
+1. Clone o repositório do GitHub: [https://github.com/Larilw/trabalho1-es2-frontend](https://github.com/Larilw/trabalho1-es2-frontend)
+2. Entre na raiz do repositório.
+3. Instale as dependências com o comando:
+
+```console
+  npm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Instalação da api para desenvolvimento
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+1.  Siga as instruções de instalação do README do repositório do GitHub: [https://github.com/guilhermemon18/trabalho1-es2-backend](https://github.com/guilhermemon18/trabalho1-es2-backend)
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+---
 
-## Learn More
+## Execução para desenvolvimento
 
-To learn more about Next.js, take a look at the following resources:
+### Execução do frontend
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+1. Entre na raiz do repositório do projeto.
+2. Execute o seguinte comando:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+- ```console
+  npm run dev
+  ```
 
-## Deploy on Vercel
+- Ao executar esse comando, o servidor de desenvolvimento do frontend irá tentar inicializar e rodar na porta 3000, se ocorrer algum erro será utilizada a porta 3001.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Estrutura do projeto
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+### Estrutura de diretórios
+
+Os arquivos do repositório seguem a seguinte estrutura:
+
+```
+── /public
+│
+└── /src
+├── /app
+├── /components
+├── /models
+└── /pages
+
+```
+
+### Descrição dos Diretórios
+
+- '/public': Contém as imagens utilizadas no projeto.
+
+- '/src/components': Contém componentes utilizados nas páginas da aplicação listas, dialogs e campo de busca.
+
+- '/src/models': Contém as definições de interface para Endereço, Profissional, Projeto e Time.
+
+- '/src/pages': Contém os layouts das páginas da aplicação juntamente com suas estruturas de funcionamento.
