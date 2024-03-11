@@ -37,8 +37,12 @@ import { Profissional } from "@/models/Profissional";
 const PageProjeto = () => {
   const [searchValue, setSearchValue] = useState("");
   const [openConfirmationDialog, setOpenConfirmationDialog] = useState(false);
-  const [confirmationDeleteId, setConfirmationDeleteId] = useState<number | null>(null);
-  const [confirmationSaveId, setConfirmationSaveId] = useState<number | null>(null);
+  const [confirmationDeleteId, setConfirmationDeleteId] = useState<
+    number | null
+  >(null);
+  const [confirmationSaveId, setConfirmationSaveId] = useState<number | null>(
+    null
+  );
   const [openFormDialog, setOpenFormDialog] = useState(false);
   const [name, setName] = useState("");
   const [times, setTimes] = useState<Time[]>([]);
@@ -74,13 +78,17 @@ const PageProjeto = () => {
   }, []);
 
   const handleClickCadastrar = async () => {
-    const responseCadastro = await fetchDados("time/inserir", "POST", {nomeTime: name});
+    const responseCadastro = await fetchDados("time/inserir", "POST", {
+      nomeTime: name,
+    });
     console.log("Cadastrou time");
     const responseListar = await fetchDados("time/listar", "GET");
     setTimes(responseListar.result);
   };
 
   const handleClickBuscar = async (id: number) => {
+    setChecked([]); // Limpa todos os checkeds
+
     const fetchData = async () => {
       try {
         const responseProjetos = await fetchDados(`time/buscar/${id}`, "GET");
@@ -91,18 +99,35 @@ const PageProjeto = () => {
       }
 
       try {
-        const responseProfissionais = await fetchDados("profissional/listar", "GET");
+        const responseProfissionais = await fetchDados(
+          "profissional/listar",
+          "GET"
+        );
         const profissionais = responseProfissionais.result;
         setProfissionais(profissionais);
+        console.log(profissionais);
       } catch (error) {
         console.error("Erro ao buscar time:", error);
       }
     };
+    const profissionaisMarcados = profissionais.filter(
+      (profissional: Profissional) => profissional.idTime === id
+    );
+    console.log("MARCADOS: ", profissionaisMarcados);
+    profissionaisMarcados.forEach((profissional) => {
+      setChecked((prevChecked) => [
+        ...prevChecked,
+        profissional.idProfissional,
+      ]);
+    });
+
     fetchData();
   };
 
   const handleClickAlterar = async (id: number) => {
-    const responseAlteracao = await fetchDados(`time/alterar/${id}`, "PUT", {nomeTime: name});
+    const responseAlteracao = await fetchDados(`time/alterar/${id}`, "PUT", {
+      nomeTime: name,
+    });
     console.log("Alterou time");
     const responseListar = await fetchDados("time/listar", "GET");
     setTimes(responseListar.result);
@@ -242,17 +267,21 @@ const PageProjeto = () => {
                                 <Checkbox
                                   edge="end"
                                   onChange={handleToggle(value.idProfissional)}
-                                  checked={checked.indexOf(value.idProfissional) !== -1}
+                                  checked={
+                                    checked.indexOf(value.idProfissional) !== -1
+                                  }
                                   inputProps={{ "aria-labelledby": labelId }}
                                 />
                               }
                               disablePadding
                             >
-                              <ListItemButton onClick={handleToggle(value.idProfissional)}>
+                              <ListItemButton
+                                onClick={handleToggle(value.idProfissional)}
+                              >
                                 <ListItemAvatar>
                                   <Avatar
                                     alt={`Avatar`}
-                                  // src={`/static/images/avatar/${value + 1}.jpg`}
+                                    // src={`/static/images/avatar/${value + 1}.jpg`}
                                   />
                                 </ListItemAvatar>
                                 <ListItemText
@@ -276,7 +305,10 @@ const PageProjeto = () => {
                 setConfirmationSaveId(null);
                 setOpenFormDialog(true);
                 try {
-                  const responseProfissionais = await fetchDados("profissional/listar", "GET");
+                  const responseProfissionais = await fetchDados(
+                    "profissional/listar",
+                    "GET"
+                  );
                   const profissionais = responseProfissionais.result;
                   setProfissionais(profissionais);
                 } catch (error) {

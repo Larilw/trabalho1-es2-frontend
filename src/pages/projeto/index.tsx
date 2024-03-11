@@ -31,7 +31,7 @@ import customParseFormat from "dayjs/plugin/customParseFormat";
 import React from "react";
 import { NumericFormat } from "react-number-format";
 import { fetchDados } from "@/fetch";
-import { Projeto } from "@/models/Projeto";
+import { Projeto, Cliente } from "@/models/Projeto";
 import { Time } from "@/models/Time";
 
 interface PriceInputProps {
@@ -59,8 +59,12 @@ function PriceInput({ price, setPrice }: PriceInputProps) {
 const PageProjeto = () => {
   const [searchValue, setSearchValue] = useState("");
   const [openConfirmationDialog, setOpenConfirmationDialog] = useState(false);
-  const [confirmationDeleteId, setConfirmationDeleteId] = useState<number | null>(null);
-  const [confirmationSaveId, setConfirmationSaveId] = useState<number | null>(null);
+  const [confirmationDeleteId, setConfirmationDeleteId] = useState<
+    number | null
+  >(null);
+  const [confirmationSaveId, setConfirmationSaveId] = useState<number | null>(
+    null
+  );
   const [openFormDialog, setOpenFormDialog] = useState(false);
   const [beginDate, setBeginDate] = useState<Date | null>(dayjs().toDate());
   const [endDate, setEndDate] = useState<Date | null>(dayjs().toDate());
@@ -71,9 +75,10 @@ const PageProjeto = () => {
   const [description, setDescription] = useState("");
   const [price, setPrice] = useState("");
   const [projetos, setProjetos] = useState<Projeto[]>([]);
-  const [clientes, setClientes] = useState([]);
   const [times, setTimes] = useState<Time[]>([]);
   const [timeSelecionado, setTimeSelecionado] = React.useState<Number>();
+  const [clientes, setClientes] = useState<Cliente[]>();
+  const [clienteSelecionado, setClienteSelecionado] = React.useState<Number>();
 
   dayjs.extend(customParseFormat);
   const formatoData = "DD/MM/YYYY";
@@ -113,12 +118,22 @@ const PageProjeto = () => {
       } catch (error) {
         console.error("Erro ao listar times:", error);
       }
+
+      try {
+        // Pega a listagem de clientes para fornecer durante o cadastro
+        const responseClientes = await fetchDados("cliente/listar", "GET");
+        setClientes(responseClientes.result);
+      } catch (error) {
+        console.error("Erro ao listar clientes:", error);
+      }
     };
     fetchData();
   }, []);
 
   const handleClickCadastrar = async () => {
-    const formattedBeginDate = beginDate ? dayjs(beginDate).format("YYYY-MM-DD") : "";
+    const formattedBeginDate = beginDate
+      ? dayjs(beginDate).format("YYYY-MM-DD")
+      : "";
     const formattedEndDate = endDate ? dayjs(endDate).format("YYYY-MM-DD") : "";
     setFormattedBeginDate(formattedBeginDate);
     setFormattedEndDate(formattedEndDate);
@@ -152,7 +167,7 @@ const PageProjeto = () => {
       try {
         const responseBusca = await fetchDados(`projeto/buscar/${id}`, "GET");
         const projeto = responseBusca.result;
-/*
+        /*
         console.log({
           name: projeto.nomeProjeto,
           client: projeto.cliente,
@@ -300,14 +315,30 @@ const PageProjeto = () => {
                     />
                   </Grid>
                   <Grid item xs={12}>
-                    <TextField
-                      fullWidth
-                      id="outlined-basic"
-                      label="Nome do Cliente"
-                      variant="outlined"
-                      value={client}
-                      onChange={(e) => setClient(e.target.value)}
-                    />
+                    <FormControl fullWidth>
+                      <InputLabel id="client-select-label">Cliente</InputLabel>
+                      <Select
+                        label="Cliente"
+                        value={clienteSelecionado}
+                        onChange={(e) => {
+                          setClienteSelecionado(e.target.value as Number);
+                        }}
+                        MenuProps={{
+                          PaperProps: { sx: { maxHeight: "8rem" } },
+                        }}
+                      >
+                        {Array.isArray(clientes) &&
+                          clientes.length > 0 &&
+                          clientes.map((cliente: Cliente) => (
+                            <MenuItem
+                              key={cliente.idCliente}
+                              value={cliente.idCliente}
+                            >
+                              {cliente.nomeCompleto}
+                            </MenuItem>
+                          ))}
+                      </Select>
+                    </FormControl>
                   </Grid>
                   <Grid item width={"19.5rem"}>
                     <TextField

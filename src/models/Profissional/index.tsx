@@ -3,17 +3,18 @@ import { Especialidade } from "../Especialidade";
 import { Time } from "../Time";
 
 export interface Profissional {
-    idProfissional: number;
-    nomeCompleto: string;
-    nomeSocial: string;
-    cpf: string;
-    dataNascimento: string;
-    raca: string;
-    genero: string;
-    nroEndereco: number;
-    complementoEndereco: string;
-    cep: string;
-    especialidade: Especialidade;
-    time: Time;
-    endereco: Endereco;
+  idProfissional: number;
+  nomeCompleto: string;
+  nomeSocial: string;
+  cpf: string;
+  dataNascimento: string;
+  raca: string;
+  genero: string;
+  nroEndereco: number;
+  complementoEndereco: string;
+  cep: string;
+  especialidade: Especialidade;
+  time: Time;
+  endereco: Endereco;
+  idTime: number;
 }
