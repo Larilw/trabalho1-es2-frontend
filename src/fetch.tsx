@@ -11,7 +11,7 @@ export async function fetchDados(url: string, method: string, content?: any) {
   }
 
   const response = await fetch(
-    "http://localhost:3300/empresa-tec/" + url,
+    "https://t1-es2-fe42005afc1a.herokuapp.com/empresa-tec/" + url,
     options
   );
   const dados = await response.json();
