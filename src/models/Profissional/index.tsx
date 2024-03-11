@@ -16,5 +16,6 @@ export interface Profissional {
   especialidade: Especialidade;
   idTime: number;
   time: Time;
+  idEndereco: number;
   endereco: Endereco;
 }

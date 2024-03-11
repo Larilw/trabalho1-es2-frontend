@@ -47,6 +47,8 @@ const PageProjeto = () => {
   const [name, setName] = useState("");
   const [times, setTimes] = useState<Time[]>([]);
   const [profissionais, setProfissionais] = useState<Profissional[]>([]);
+  const [bornDate, setBornDate] = useState<Date | null>(dayjs().toDate());
+  const [formattedBornDate, setFormattedBornDate] = useState("");
 
   /*Lista do modal*/
   const [checked, setChecked] = React.useState<number[]>([]);
@@ -81,7 +83,12 @@ const PageProjeto = () => {
     try {
       const responseProfissionais = await fetchDados("profissional/listar","GET");
       const profissionais = responseProfissionais.result;
-      setProfissionais(profissionais);
+      console.log("TODOS: ", profissionais);
+      const profissionaisLivres = profissionais.filter(
+        (profissional: Profissional) => profissional.idTime !== null
+      );
+      console.log("LIVRES: ", profissionaisLivres);
+      setProfissionais(profissionaisLivres);
     } catch (error) {
       console.error("Erro ao buscar time:", error);
     }
@@ -113,7 +120,6 @@ const PageProjeto = () => {
         );
         const profissionais = responseProfissionais.result;
         setProfissionais(profissionais);
-
         const profissionaisMarcados = profissionais.filter(
           (profissional: Profissional) => profissional.idTime === id
         );
@@ -128,7 +134,6 @@ const PageProjeto = () => {
         console.error("Erro ao buscar time:", error);
       }
     };
-
     fetchData();
   };
 
@@ -136,6 +141,27 @@ const PageProjeto = () => {
     const responseAlteracao = await fetchDados(`time/alterar/${id}`, "PUT", {
       nomeTime: name,
     });
+    /*
+    // Tenta alterar todos os profissionais
+    const formattedBornDate = bornDate
+      ? dayjs(bornDate).format("YYYY-MM-DD")
+      : "";
+    setFormattedBornDate(formattedBornDate);
+    profissionais.map((profissional) => ({
+      const responseAlteracaoP = await fetchDados(`profissional/alterar/${profissional.idProfissional}`, "PUT", {
+        nomeCompleto: profissional.nomeCompleto,
+        cpf: profissional.cpf,
+        dataNascimento: formattedBornDate,
+        raca: profissional.raca,
+        genero: profissional.genero,
+        nroEndereco: profissional.nroEndereco,
+        complementoEndereco: profissional.complementoEndereco,
+        idEndereco: profissional.idEndereco,
+        idTime: profissional.idTime,
+        idEspecialidade: profissional.especialidade.idEspecialidade,
+      })
+    }));
+    */
     console.log("Alterou time");
     const responseListar = await fetchDados("time/listar", "GET");
     setTimes(responseListar.result);
@@ -219,8 +245,12 @@ const PageProjeto = () => {
                 setConfirmation={(confirmed) => {
                   if (confirmed && confirmationSaveId !== null) {
                     handleClickAlterar(confirmationSaveId);
+                    setProfissionais([]);
+                    setChecked([]);
                   } else if (confirmed && confirmationSaveId === null) {
                     handleClickCadastrar();
+                    setProfissionais([]);
+                    setChecked([]);
                   }
                   setConfirmationSaveId(null);
                 }}
@@ -312,6 +342,8 @@ const PageProjeto = () => {
               onClick={async (id) => {
                 setConfirmationSaveId(null);
                 setOpenFormDialog(true);
+                setProfissionais([]);
+                setChecked([]);
               }}
             >
               <AddIcon />
