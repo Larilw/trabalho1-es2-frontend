@@ -14,7 +14,7 @@ export interface Profissional {
   complementoEndereco: string;
   cep: string;
   especialidade: Especialidade;
+  idTime: number;
   time: Time;
   endereco: Endereco;
-  idTime: number;
 }

@@ -154,7 +154,7 @@ const PageProjeto = () => {
       dataInicio: formattedBeginDate,
       dataTermino: formattedEndDate,
       valor: price,
-      idCliente: 1,
+      idCliente: clienteSelecionado,
       idTime: timeSelecionado,
     });
     console.log("Cadastrou projeto");

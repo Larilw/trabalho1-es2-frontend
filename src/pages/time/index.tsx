@@ -78,12 +78,20 @@ const PageProjeto = () => {
   }, []);
 
   const handleClickCadastrar = async () => {
+    try {
+      const responseProfissionais = await fetchDados("profissional/listar","GET");
+      const profissionais = responseProfissionais.result;
+      setProfissionais(profissionais);
+    } catch (error) {
+      console.error("Erro ao buscar time:", error);
+    }
     const responseCadastro = await fetchDados("time/inserir", "POST", {
       nomeTime: name,
     });
     console.log("Cadastrou time");
     const responseListar = await fetchDados("time/listar", "GET");
     setTimes(responseListar.result);
+
   };
 
   const handleClickBuscar = async (id: number) => {
@@ -284,10 +292,10 @@ const PageProjeto = () => {
                                     // src={`/static/images/avatar/${value + 1}.jpg`}
                                   />
                                 </ListItemAvatar>
-                                <ListItemText
-                                  id={labelId}
-                                  primary={`${value.nomeCompleto} - ${value.especialidade}`}
-                                />
+                                  <ListItemText
+                                    id={labelId}
+                                    primary={`${value.nomeCompleto} - ${value.especialidade}`}
+                                  />
                               </ListItemButton>
                             </ListItem>
                           );
@@ -304,16 +312,6 @@ const PageProjeto = () => {
               onClick={async (id) => {
                 setConfirmationSaveId(null);
                 setOpenFormDialog(true);
-                try {
-                  const responseProfissionais = await fetchDados(
-                    "profissional/listar",
-                    "GET"
-                  );
-                  const profissionais = responseProfissionais.result;
-                  setProfissionais(profissionais);
-                } catch (error) {
-                  console.error("Erro ao buscar time:", error);
-                }
               }}
             >
               <AddIcon />

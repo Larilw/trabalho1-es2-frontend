@@ -61,7 +61,8 @@ const PageProfissional = () => {
   const [unidadeFederativa, setUnidadeFederativa] = useState("");
   const [profissionais, setProfissionais] = useState<Profissional[]>([]);
   const [especialidades, setEspecialidades] = useState<Especialidade[]>([]);
-  const [especialidadeSelecionada, setEspecialidadeSelecionada] = React.useState<Number>();
+  const [especialidadeSelecionada, setEspecialidadeSelecionada] =
+    React.useState<Number>();
   const [ufs, setUfs] = useState<UnidadeFederativa[]>([]);
   const [ufSelecionada, setUfSelecionada] = React.useState<Number>();
 
@@ -109,8 +110,19 @@ const PageProfissional = () => {
     fetchData();
   }, []);
 
+  const fetchProfissionais = async () => {
+    try {
+      const response = await fetchDados("profissional/listar", "GET");
+      setProfissionais(response.result);
+    } catch (error) {
+      console.error("Erro ao buscar profissionais:", error);
+    }
+  };
+
   const handleClickCadastrar = async () => {
-    const formattedBornDate = bornDate ? dayjs(bornDate).format("YYYY-MM-DD") : "";
+    const formattedBornDate = bornDate
+      ? dayjs(bornDate).format("YYYY-MM-DD")
+      : "";
     setFormattedBornDate(formattedBornDate);
 
     try {
@@ -135,17 +147,21 @@ const PageProfissional = () => {
       }
       );
       console.log("Cadastrou profissional");
+      await fetchProfissionais();
     } catch (error) {
-      console.error("Erro ao cadastrar profissional:", error);
+      console.error("Erro ao cadastrar profissional ", error);
+    } finally {
+      await fetchProfissionais();
     }
-    const responseListar = await fetchDados("projeto/listar", "GET");
-    setProfissionais(responseListar.result);
   };
 
   const handleClickBuscar = async (id: number) => {
     const fetchData = async () => {
       try {
-        const responseBusca = await fetchDados(`profissional/buscar/${id}`, "GET");
+        const responseBusca = await fetchDados(
+          `profissional/buscar/${id}`,
+          "GET"
+        );
         const profissional = responseBusca.result;
 
         setName(profissional.nomeCompleto);
@@ -157,7 +173,10 @@ const PageProfissional = () => {
         setCpf(profissional.cpf);
         setNumero(profissional.nroEndereco);
 
-        const responseEndereco = await fetchDados(`endereco/buscarEnderecoCompleto/${profissional.idEndereco}`, "GET");
+        const responseEndereco = await fetchDados(
+          `endereco/buscarEnderecoCompleto/${profissional.idEndereco}`,
+          "GET"
+        );
         const endereco = responseEndereco.result;
         setCep(endereco.cep);
         setCepNumerico(endereco.cep);
@@ -166,10 +185,16 @@ const PageProfissional = () => {
         setCidade(endereco.cidade);
         setUnidadeFederativa(endereco.unidadeFederativa);
 
-        const responseEspecialidades = await fetchDados(`especialidade/listar`, "GET");
+        const responseEspecialidades = await fetchDados(
+          `especialidade/listar`,
+          "GET"
+        );
         setEspecialidades(responseEspecialidades.result);
 
-        const responseUfs = await fetchDados(`endereco/listarUnidadesFederativas`, "GET");
+        const responseUfs = await fetchDados(
+          `endereco/listarUnidadesFederativas`,
+          "GET"
+        );
         setUfs(responseUfs.result);
       } catch (error) {
         console.error("Erro ao buscar profissional:", error);
@@ -179,28 +204,51 @@ const PageProfissional = () => {
   };
 
   const handleClickAlterar = async (id: number) => {
-    const formattedBornDate = bornDate ? dayjs(bornDate).format("YYYY-MM-DD") : "";
+    const formattedBornDate = bornDate
+      ? dayjs(bornDate).format("YYYY-MM-DD")
+      : "";
     setFormattedBornDate(formattedBornDate);
-    console.log("entrou no alterar")
-    const responseBairro = await fetchDados("endereco/inserirBairro", "POST", { bairro: bairro });
-    const responseLogradouro = await fetchDados("endereco/inserirLogradouro", "POST", { logradouro: logradouro, idTipoLogradouro: 1 });
-    const responseCidade = await fetchDados("endereco/inserirCidade", "POST", { cidade: cidade, idUnidadeFederativa: ufSelecionada });
-    const responseEndereco = await fetchDados("endereco/inserirEndereco", "POST", { cep: cep, idBairro: responseBairro.result.idBairro, idLogradouro: responseLogradouro.result.idLogradouro, idCidade: responseCidade.result.idCidade });
-    const responseAlteracao = await fetchDados(`profissional/alterar/${id}`, "PUT", {
-      nomeCompleto: name,
-      nomeSocial: "",
-      cpf: cpf,
-      dataNascimento: formattedBornDate,
-      raca: race,
-      genero: gender,
-      nroEndereco: numero,
-      complementoEndereco: "",
-      cep,
-      idEndereco: responseEndereco.result.idEndereco,
-      idTime: 1,
-      //idTime: timeSelecionado,
-      idEspecialidade: especialidadeSelecionada,
-    }
+    console.log("entrou no alterar");
+    const responseBairro = await fetchDados("endereco/inserirBairro", "POST", {
+      bairro: bairro,
+    });
+    const responseLogradouro = await fetchDados(
+      "endereco/inserirLogradouro",
+      "POST",
+      { logradouro: logradouro, idTipoLogradouro: 1 }
+    );
+    const responseCidade = await fetchDados("endereco/inserirCidade", "POST", {
+      cidade: cidade,
+      idUnidadeFederativa: ufSelecionada,
+    });
+    const responseEndereco = await fetchDados(
+      "endereco/inserirEndereco",
+      "POST",
+      {
+        cep: cep,
+        idBairro: responseBairro.result.idBairro,
+        idLogradouro: responseLogradouro.result.idLogradouro,
+        idCidade: responseCidade.result.idCidade,
+      }
+    );
+    const responseAlteracao = await fetchDados(
+      `profissional/alterar/${id}`,
+      "PUT",
+      {
+        nomeCompleto: name,
+        nomeSocial: "",
+        cpf: cpf,
+        dataNascimento: formattedBornDate,
+        raca: race,
+        genero: gender,
+        nroEndereco: numero,
+        complementoEndereco: "",
+        cep,
+        idEndereco: responseEndereco.result.idEndereco,
+        idTime: 1,
+        //idTime: timeSelecionado,
+        idEspecialidade: especialidadeSelecionada,
+      }
     );
     console.log("Alterou profissional");
     const responseListar = await fetchDados("profissional/listar", "GET");
@@ -208,7 +256,10 @@ const PageProfissional = () => {
   };
 
   const handleClickExcluir = async (id: number) => {
-    const responseExclusao = await fetchDados(`profissional/excluir/${id}`, "PUT");
+    const responseExclusao = await fetchDados(
+      `profissional/excluir/${id}`,
+      "PUT"
+    );
     console.log("Excluiu profissional");
     const responseListar = await fetchDados("profissional/listar", "GET");
     setProfissionais(responseListar.result);
@@ -378,7 +429,9 @@ const PageProfissional = () => {
                         value={especialidadeSelecionada}
                         label="Especialidade"
                         onChange={(e) => {
-                          setEspecialidadeSelecionada(e.target.value as unknown as Number);
+                          setEspecialidadeSelecionada(
+                            e.target.value as unknown as Number
+                          );
                         }}
                         MenuProps={{
                           PaperProps: { sx: { maxHeight: "8rem" } },
@@ -387,7 +440,10 @@ const PageProfissional = () => {
                         {Array.isArray(especialidades) &&
                           especialidades.length > 0 &&
                           especialidades.map((especialidade: Especialidade) => (
-                            <MenuItem key={especialidade.idEspecialidade} value={especialidade.idEspecialidade}>
+                            <MenuItem
+                              key={especialidade.idEspecialidade}
+                              value={especialidade.idEspecialidade}
+                            >
                               {especialidade.tipoEspecialidade}
                             </MenuItem>
                           ))}
@@ -442,9 +498,7 @@ const PageProfissional = () => {
                   </Grid>
                   <Grid item width={"3.5rem"}>
                     <FormControl fullWidth>
-                      <InputLabel id="expertise-select-label">
-                        UF
-                      </InputLabel>
+                      <InputLabel id="expertise-select-label">UF</InputLabel>
                       <Select
                         labelId="uf-select-label"
                         id="uf-select"
@@ -460,7 +514,10 @@ const PageProfissional = () => {
                         {Array.isArray(ufs) &&
                           ufs.length > 0 &&
                           ufs.map((uf: UnidadeFederativa) => (
-                            <MenuItem key={uf.siglaUnidadeFederativa} value={uf.idUnidadeFederativa}>
+                            <MenuItem
+                              key={uf.siglaUnidadeFederativa}
+                              value={uf.idUnidadeFederativa}
+                            >
                               {uf.siglaUnidadeFederativa}
                             </MenuItem>
                           ))}
@@ -500,9 +557,15 @@ const PageProfissional = () => {
                 setGender("");
                 setConfirmationSaveId(null);
                 setOpenFormDialog(true);
-                const responseEspecialidades = await fetchDados(`especialidade/listar`, "GET");
+                const responseEspecialidades = await fetchDados(
+                  `especialidade/listar`,
+                  "GET"
+                );
                 setEspecialidades(responseEspecialidades.result);
-                const responseUfs = await fetchDados(`endereco/listarUnidadesFederativas`, "GET");
+                const responseUfs = await fetchDados(
+                  `endereco/listarUnidadesFederativas`,
+                  "GET"
+                );
                 setUfs(responseUfs.result);
               }}
             >
