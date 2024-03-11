@@ -114,7 +114,6 @@ const PageProfissional = () => {
       const responseUnidadeFederativa = await fetchDados(`endereco/buscarIdUnidadeFederativa/${unidadeFederativa}`, "GET");
       const responseCidade = await fetchDados("endereco/inserirCidade", "POST", {cidade: cidade, idUnidadeFederativa: 1});
       const responseEndereco = await fetchDados("endereco/inserirEndereco", "POST", {cep: cep, idBairro: responseBairro.result.idBairro, idLogradouro: responseLogradouro.result.idLogradouro, idCidade: responseCidade.result.idCidade});
-      console.log(responseEndereco);
       const responseCadastro = await fetchDados("profissional/inserir", "POST", {
           nomeCompleto: name,
           nomeSocial: "",
@@ -234,8 +233,7 @@ const PageProfissional = () => {
                 setOpen={setOpenConfirmationDialog}
                 setConfirmation={(confirmed) => {
                   if (confirmed && confirmationDeleteId !== null) {
-                    // Faça a lógica de exclusão aqui
-                    console.log("Excluir item com ID:", confirmationDeleteId);
+                    handleClickExcluir(confirmationDeleteId);
                   }
                   setConfirmationDeleteId(null);
                 }}
